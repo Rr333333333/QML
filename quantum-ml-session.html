@@ -1,0 +1,2476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum ML · Faculty Session</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap');
+
+  :root {
+    --void: #05060F;
+    --deep: #0A0D1E;
+    --panel: #0F1228;
+    --surface: #141830;
+    --border: #1E2340;
+    --accent: #6C63FF;
+    --accent2: #00D4AA;
+    --accent3: #FF6B6B;
+    --accent4: #FFB347;
+    --text: #E8EAF6;
+    --muted: #8890BB;
+    --glow: rgba(108,99,255,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ── STARFIELD ── */
+  #starfield {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 20% 50%, #0D0A2A 0%, #05060F 70%);
+  }
+  #starfield canvas { width: 100%; height: 100%; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(5,6,15,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  .nav-brand {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .nav-tabs {
+    display: flex; gap: 0.25rem;
+    list-style: none;
+  }
+  .nav-tabs button {
+    background: none; border: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.78rem;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0.4rem 0.85rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+  .nav-tabs button:hover { color: var(--text); background: var(--surface); }
+  .nav-tabs button.active { color: var(--accent); background: rgba(108,99,255,0.12); }
+
+  .timer-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--accent4);
+    background: rgba(255,179,71,0.1);
+    border: 1px solid rgba(255,179,71,0.25);
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .timer-badge:hover { background: rgba(255,179,71,0.18); }
+  .timer-badge.running { color: var(--accent3); border-color: rgba(255,107,107,0.35); background: rgba(255,107,107,0.1); }
+
+  /* ── SECTIONS ── */
+  section {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    padding: 80px 0 60px;
+  }
+  section.active { display: flex; }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    width: 100%;
+  }
+
+  /* ── HERO / INTRO ── */
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 28px; height: 1px;
+    background: var(--accent2);
+  }
+
+  h1 {
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+  .h1-quantum {
+    background: linear-gradient(135deg, #6C63FF 0%, #00D4AA 50%, #6C63FF 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s linear infinite;
+  }
+  @keyframes shimmer { to { background-position: 200% center; } }
+
+  .hero-sub {
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.35rem;
+    color: var(--muted);
+    max-width: 600px;
+    line-height: 1.6;
+    margin-bottom: 3rem;
+    font-style: italic;
+  }
+
+  .session-meta {
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    margin-bottom: 3.5rem;
+  }
+  .meta-chip {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.45rem 1rem;
+    border-radius: 3px;
+    letter-spacing: 0.08em;
+  }
+  .chip-time { background: rgba(108,99,255,0.12); color: var(--accent); border: 1px solid rgba(108,99,255,0.25); }
+  .chip-level { background: rgba(0,212,170,0.1); color: var(--accent2); border: 1px solid rgba(0,212,170,0.2); }
+  .chip-topics { background: rgba(255,107,107,0.1); color: var(--accent3); border: 1px solid rgba(255,107,107,0.2); }
+
+  .agenda-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+  }
+  .agenda-item {
+    background: var(--panel);
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .agenda-item:hover { background: var(--surface); }
+  .agenda-item::before {
+    content: attr(data-time);
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent4);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .agenda-item-title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  .agenda-item-sub {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .agenda-num {
+    position: absolute;
+    top: 1.25rem; right: 1.25rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--border);
+  }
+
+  .start-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.85rem 2.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: all 0.2s;
+    box-shadow: 0 0 30px rgba(108,99,255,0.3);
+  }
+  .start-btn:hover { background: #5A52E0; box-shadow: 0 0 40px rgba(108,99,255,0.5); transform: translateY(-1px); }
+
+  /* ── MODULE HEADER ── */
+  .module-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2rem;
+    margin-bottom: 2.5rem;
+  }
+  .module-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .module-tag span {
+    color: var(--accent2);
+    margin-right: 0.5rem;
+  }
+  h2 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
+  }
+  .module-desc {
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.1rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ── CARDS ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 60%, rgba(108,99,255,0.05) 100%);
+    pointer-events: none;
+  }
+  .card:hover { border-color: rgba(108,99,255,0.4); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+  .card-icon { font-size: 1.8rem; margin-bottom: 1rem; }
+  .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .card p { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+  .card-accent { border-top: 2px solid var(--accent); }
+  .card-accent2 { border-top: 2px solid var(--accent2); }
+  .card-accent3 { border-top: 2px solid var(--accent3); }
+  .card-accent4 { border-top: 2px solid var(--accent4); }
+
+  /* ── QUBIT VISUALIZER ── */
+  .viz-block {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  .viz-block h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .viz-block p { font-size: 0.83rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
+
+  #qubit-canvas { width: 100%; border-radius: 6px; display: block; }
+
+  .slider-row {
+    display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 1rem;
+  }
+  .slider-group { flex: 1; min-width: 180px; }
+  .slider-group label {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent2);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .slider-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent4);
+    margin-top: 0.25rem;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+  }
+  .compare-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(30,35,64,0.5);
+    line-height: 1.5;
+  }
+  .compare-table tr:hover td { background: var(--panel); }
+  .badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+  }
+  .badge-good { background: rgba(0,212,170,0.15); color: var(--accent2); }
+  .badge-warn { background: rgba(255,179,71,0.15); color: var(--accent4); }
+  .badge-bad { background: rgba(255,107,107,0.15); color: var(--accent3); }
+
+  /* ── TIMELINE ── */
+  .timeline { position: relative; padding-left: 2rem; margin-bottom: 2rem; }
+  .timeline::before {
+    content: '';
+    position: absolute; left: 7px; top: 0; bottom: 0;
+    width: 1px; background: var(--border);
+  }
+  .tl-item {
+    position: relative; margin-bottom: 1.75rem;
+  }
+  .tl-dot {
+    position: absolute; left: -2rem; top: 0.2rem;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: var(--void);
+  }
+  .tl-dot.accent2 { border-color: var(--accent2); }
+  .tl-dot.accent3 { border-color: var(--accent3); }
+  .tl-dot.accent4 { border-color: var(--accent4); }
+  .tl-year {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--accent4);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.25rem;
+  }
+  .tl-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .tl-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+  /* ── QUIZ ── */
+  .quiz-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .quiz-q {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    line-height: 1.4;
+  }
+  .quiz-opts { display: grid; gap: 0.6rem; }
+  .quiz-opt {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.75rem 1.1rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: left;
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--text);
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .quiz-opt:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); background: rgba(0,212,170,0.1); color: var(--accent2); }
+  .quiz-opt.wrong { border-color: var(--accent3); background: rgba(255,107,107,0.1); color: var(--accent3); }
+  .quiz-opt:disabled { cursor: default; }
+  .quiz-feedback {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    line-height: 1.5;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .score-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 2rem;
+    color: var(--accent2);
+    text-align: center;
+    padding: 2rem;
+  }
+
+  /* ── CRYPTO VISUAL ── */
+  .lattice-demo {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  #lattice-canvas { width: 100%; border-radius: 4px; }
+
+  /* ── PLATFORM CARDS ── */
+  .platform-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .platform-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.2s;
+  }
+  .platform-card:hover { border-color: rgba(108,99,255,0.4); transform: translateY(-2px); }
+  .platform-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 0.5rem;
+  }
+  .platform-type {
+    font-size: 0.7rem;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+  }
+  .platform-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.55; }
+  .platform-tag {
+    display: inline-block;
+    margin-top: 0.75rem;
+    font-size: 0.68rem;
+    font-family: 'Space Mono', monospace;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    background: rgba(108,99,255,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(108,99,255,0.2);
+  }
+
+  /* ── GATE SIMULATOR ── */
+  .gate-sim {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .gate-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .gate-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .gate-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .gate-btn.active { background: rgba(108,99,255,0.2); border-color: var(--accent); color: var(--accent); }
+  .gate-output {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    background: var(--deep);
+    border-radius: 4px;
+    padding: 1rem;
+    color: var(--accent2);
+    line-height: 1.8;
+    min-height: 80px;
+    white-space: pre-wrap;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-bar {
+    position: fixed; top: 56px; left: 0; right: 0; z-index: 99;
+    height: 2px;
+    background: var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease;
+  }
+
+  /* ── CIRCUIT VISUAL ── */
+  #circuit-canvas { width: 100%; display: block; border-radius: 6px; }
+
+  .formula {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.9rem;
+    background: var(--deep);
+    border-left: 3px solid var(--accent);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    color: var(--accent2);
+    border-radius: 0 4px 4px 0;
+    line-height: 1.8;
+  }
+
+  /* KEY INSIGHT CALLOUT */
+  .insight {
+    background: rgba(108,99,255,0.08);
+    border: 1px solid rgba(108,99,255,0.25);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 1rem 1.5rem;
+    margin: 1.25rem 0;
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+  .insight strong { color: var(--accent); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+  @media(max-width:700px){ .two-col { grid-template-columns: 1fr; } }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--deep); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Section transition */
+  section { animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Collapsible */
+  .accordion { margin-bottom: 1rem; }
+  .accordion-head {
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    transition: all 0.2s;
+  }
+  .accordion-head:hover { border-color: var(--accent); }
+  .accordion-head .chevron { transition: transform 0.2s; font-size: 0.75rem; color: var(--muted); }
+  .accordion-head.open .chevron { transform: rotate(180deg); }
+  .accordion-body {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    padding: 1.25rem;
+    font-size: 0.83rem;
+    color: var(--muted);
+    line-height: 1.7;
+    display: none;
+  }
+  .accordion-body.open { display: block; }
+</style>
+</head>
+<body>
+
+<canvas id="stars-bg" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">⬡ QML · Faculty Session</div>
+  <ul class="nav-tabs" id="nav-tabs">
+    <li><button onclick="goto(0)" class="active">Intro</button></li>
+    <li><button onclick="goto(1)">Quantum Basics</button></li>
+    <li><button onclick="goto(2)">QML</button></li>
+    <li><button onclick="goto(3)">Cryptography</button></li>
+    <li><button onclick="goto(4)">Platforms</button></li>
+    <li><button onclick="goto(5)">Quiz</button></li>
+  </ul>
+  <div class="timer-badge" id="timer-badge" onclick="toggleTimer()">⏱ Start Timer</div>
+</nav>
+
+<!-- ══════════════════════════════════════════ SECTION 0: INTRO -->
+<section class="active" id="sec0">
+<div class="container">
+  <div style="max-width:800px; margin-top:2rem;">
+    <div class="hero-eyebrow">Faculty Development Session · 60 Minutes</div>
+    <h1>
+      <span class="h1-quantum">Quantum</span><br>
+      Machine Learning
+    </h1>
+    <p class="hero-sub">Where superposition meets gradient descent — a practical, visual introduction to the next frontier of AI.</p>
+
+    <div class="session-meta">
+      <div class="meta-chip chip-time">⏱ 60 min · 5 modules</div>
+      <div class="meta-chip chip-level">◈ Intermediate · No prior QC needed</div>
+      <div class="meta-chip chip-topics">⬡ QC · QML · NIST PQC · Lattice Crypto</div>
+    </div>
+
+    <div class="agenda-grid">
+      <div class="agenda-item" onclick="goto(1)" data-time="0–12 MIN">
+        <span class="agenda-num">01</span>
+        <div class="agenda-item-title">Quantum Computing Basics</div>
+        <div class="agenda-item-sub">Qubits, superposition, entanglement & gates — interactive visualizer</div>
+      </div>
+      <div class="agenda-item" onclick="goto(2)" data-time="12–28 MIN">
+        <span class="agenda-num">02</span>
+        <div class="agenda-item-title">Quantum ML</div>
+        <div class="agenda-item-sub">Why QML, VQC, QAOA, advantage over classical ML</div>
+      </div>
+      <div class="agenda-item" onclick="goto(3)" data-time="28–48 MIN">
+        <span class="agenda-num">03</span>
+        <div class="agenda-item-title">Quantum Cryptography</div>
+        <div class="agenda-item-sub">NIST PQC, lattice-based crypto, why RSA breaks</div>
+      </div>
+      <div class="agenda-item" onclick="goto(4)" data-time="48–56 MIN">
+        <span class="agenda-num">04</span>
+        <div class="agenda-item-title">Learning Platforms</div>
+        <div class="agenda-item-sub">IBM Quantum, Qiskit, Google Cirq, PennyLane & more</div>
+      </div>
+      <div class="agenda-item" onclick="goto(5)" data-time="56–60 MIN">
+        <span class="agenda-num">05</span>
+        <div class="agenda-item-title">Quiz & Discussion</div>
+        <div class="agenda-item-sub">10-question rapid quiz + open Q&A</div>
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="goto(1); toggleTimer();">Begin Session →</button>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════ SECTION 1: QUANTUM BASICS -->
+<style>
+/* ── COIN ── */
+.coin-arena {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+.coin-arena h3 { font-size:1.05rem; font-weight:700; margin-bottom:0.4rem; }
+.coin-arena .sub { font-size:0.82rem; color:var(--muted); line-height:1.6; margin-bottom:1.5rem; }
+
+.coin-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.coin-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 0.8rem;
+}
+.coin-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* 3-D coin via CSS */
+.coin {
+  width: 90px; height: 90px;
+  position: relative;
+  cursor: pointer;
+}
+.coin-inner {
+  width:100%; height:100%;
+  position: relative;
+  border-radius: 50%;
+}
+/* Both faces sit flat, stacked — opacity controls which is visible */
+.coin-face {
+  position: absolute; inset:0;
+  border-radius: 50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size: 2.1rem;
+  font-weight:900;
+  border: 3px solid;
+  transition: opacity 0.08s;
+}
+/* CLASSICAL */
+.coin-face.heads {
+  background: radial-gradient(circle at 35% 35%, #FFD700, #B8860B);
+  border-color: #DAA520;
+  color: #5a3a00;
+  opacity: 1;
+}
+.coin-face.tails {
+  background: radial-gradient(circle at 35% 35%, #C0C0C0, #707070);
+  border-color: #999;
+  color: #2a2a2a;
+  opacity: 0;
+}
+/* QUANTUM faces */
+.coin.quantum .coin-face.heads {
+  background: radial-gradient(circle at 35% 35%, #8B5CF6, #4C1D95);
+  border-color: #6C63FF;
+  color: #E8EAF6;
+}
+.coin.quantum .coin-face.tails {
+  background: radial-gradient(circle at 35% 35%, #00D4AA, #065f46);
+  border-color: #00D4AA;
+  color: #E8EAF6;
+}
+/* SUPERPOSITION: flicker both faces with opacity, sync'd opposite phase */
+.coin.superposed .coin-face.heads {
+  animation: flickerH 0.65s steps(1,end) infinite;
+}
+.coin.superposed .coin-face.tails {
+  animation: flickerT 0.65s steps(1,end) infinite;
+}
+@keyframes flickerH {
+  0%,48%  { opacity:1; }
+  50%,100%{ opacity:0; }
+}
+@keyframes flickerT {
+  0%,48%  { opacity:0; }
+  50%,100%{ opacity:1; }
+}
+/* Outer glow alternates purple ↔ teal in sync */
+.coin.superposed {
+  animation: ringPulse 0.65s steps(1,end) infinite;
+}
+@keyframes ringPulse {
+  0%,48%  { filter: drop-shadow(0 0 20px rgba(108,99,255,1))  drop-shadow(0 0 6px rgba(108,99,255,0.6)); }
+  50%,100%{ filter: drop-shadow(0 0 20px rgba(0,212,170,1))   drop-shadow(0 0 6px rgba(0,212,170,0.6)); }
+}
+/* Collapsed state: show only the result face */
+.coin.collapsed-0 .coin-face.heads { opacity:1; animation:none; }
+.coin.collapsed-0 .coin-face.tails { opacity:0; animation:none; }
+.coin.collapsed-1 .coin-face.heads { opacity:0; animation:none; }
+.coin.collapsed-1 .coin-face.tails { opacity:1; animation:none; }
+
+
+.coin-state-bar {
+  width: 90px; height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.coin-state-fill {
+  height:100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.coin-btns { display:flex; gap:0.6rem; flex-wrap:wrap; justify-content:center; margin-bottom:1rem; }
+.coin-btn {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:0.8rem; font-weight:600;
+  padding:0.5rem 1.1rem;
+  border-radius:5px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.coin-btn:hover { border-color:var(--accent); color:var(--accent); }
+.coin-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 0 16px rgba(108,99,255,0.35); }
+.coin-btn.primary:hover { background:#5A52E0; }
+
+.coin-explainer {
+  background: var(--deep);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  font-size: 0.83rem;
+  color: var(--muted);
+  line-height: 1.7;
+  border-left: 3px solid var(--accent);
+  min-height: 60px;
+  transition: all 0.3s;
+}
+.coin-stats {
+  display:flex; gap:1.5rem; flex-wrap:wrap;
+  margin-top:1rem;
+  font-family:'Space Mono',monospace;
+  font-size:0.75rem;
+}
+.coin-stat { color:var(--muted); }
+.coin-stat span { color:var(--accent2); font-weight:700; }
+
+/* probability bar chart */
+.prob-bars {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.prob-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 42px;
+}
+.prob-bar-val {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  min-height: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.prob-bar-track {
+  width: 36px;
+  height: 54px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 3px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.prob-bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.4s ease;
+}
+.prob-bar-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ── DICE (ENTANGLEMENT) ── */
+.dice-arena {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+.entangle-link {
+  display: flex; align-items:center; justify-content:center;
+  gap:0; margin-bottom: 1.5rem;
+  position: relative;
+}
+.entangle-wire {
+  height: 2px;
+  flex:1;
+  max-width: 80px;
+  background: linear-gradient(90deg, transparent, rgba(108,99,255,0.6), transparent);
+  position:relative;
+}
+.entangle-wire::after {
+  content:'';
+  position:absolute; top:-3px; left:50%;
+  transform:translateX(-50%);
+  width:8px; height:8px;
+  border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 10px var(--accent);
+  animation:wireGlow 1.5s ease-in-out infinite alternate;
+}
+@keyframes wireGlow {
+  from { opacity:0.4; box-shadow:0 0 6px var(--accent); }
+  to   { opacity:1;   box-shadow:0 0 18px var(--accent), 0 0 30px rgba(108,99,255,0.4); }
+}
+.entangle-center-icon {
+  font-size:1.4rem;
+  padding:0 0.5rem;
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+
+/* 3D Dice */
+.dice-scene {
+  display:flex; flex-direction:column; align-items:center; gap:0.6rem;
+}
+.dice {
+  width:80px; height:80px;
+  position:relative;
+  cursor:pointer;
+  perspective:300px;
+  user-select:none;
+}
+.dice-inner {
+  width:100%; height:100%;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:transform 0.6s cubic-bezier(.4,1.3,.6,1);
+  border-radius:14px;
+}
+.dice.rolling .dice-inner {
+  animation: diceRoll 0.6s cubic-bezier(.4,0,.6,1) forwards;
+}
+@keyframes diceRoll {
+  0%   { transform:rotateX(0deg) rotateY(0deg); }
+  40%  { transform:rotateX(var(--rx,360deg)) rotateY(var(--ry,360deg)) scale(1.15); }
+  100% { transform:rotateX(var(--rx2,720deg)) rotateY(var(--ry2,720deg)); }
+}
+.dice-face {
+  position:absolute; inset:0;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  backface-visibility:hidden;
+  font-size:1.8rem;
+  font-weight:900;
+  border:2px solid rgba(255,255,255,0.15);
+  box-shadow:inset 0 0 15px rgba(0,0,0,0.4);
+}
+.dice-face.d-front  { background:linear-gradient(135deg,#1E2340,#141830); transform:translateZ(40px); }
+.dice-face.d-back   { background:linear-gradient(135deg,#1a1f38,#0F1228); transform:rotateY(180deg) translateZ(40px); }
+.dice-face.d-right  { background:linear-gradient(135deg,#1d2240,#111428); transform:rotateY(90deg) translateZ(40px); }
+.dice-face.d-left   { background:linear-gradient(135deg,#1e2240,#101328); transform:rotateY(-90deg) translateZ(40px); }
+.dice-face.d-top    { background:linear-gradient(135deg,#202545,#13172e); transform:rotateX(90deg) translateZ(40px); }
+.dice-face.d-bot    { background:linear-gradient(135deg,#1c2138,#0d1025); transform:rotateX(-90deg) translateZ(40px); }
+
+/* Dice dots */
+.dots { display:grid; width:100%; height:100%; padding:10px; gap:4px; place-items:center; }
+.dot {
+  width:12px; height:12px;
+  border-radius:50%;
+  background:var(--text);
+  box-shadow:0 0 6px rgba(255,255,255,0.5);
+}
+.dot.purple { background:var(--accent); box-shadow:0 0 8px var(--accent); }
+.dot.teal   { background:var(--accent2); box-shadow:0 0 8px var(--accent2); }
+
+.dice-label {
+  font-family:'Space Mono',monospace; font-size:0.7rem;
+  letter-spacing:0.1em; color:var(--muted); text-transform:uppercase;
+}
+.dice-value-display {
+  font-family:'Space Mono',monospace; font-size:1.6rem; font-weight:700;
+  min-height:2.2rem; display:flex; align-items:center; justify-content:center;
+  width:80px;
+}
+.dice.is-a .dice-value-display { color:var(--accent); }
+.dice-B .dice-value-display { color:var(--accent2); }
+
+.dice-hint {
+  font-family:'Crimson Pro',serif;
+  font-style:italic;
+  font-size:0.9rem;
+  color:var(--muted);
+  text-align:center;
+  margin-bottom:1.5rem;
+}
+.dice-reveal {
+  background:var(--deep);
+  border-radius:8px;
+  padding:1rem 1.25rem;
+  font-size:0.83rem;
+  color:var(--muted);
+  line-height:1.7;
+  border-left:3px solid var(--accent2);
+  min-height:52px;
+  transition:all 0.3s;
+}
+.entangle-on-badge {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  font-family:'Space Mono',monospace;
+  font-size:0.68rem;
+  padding:0.25rem 0.7rem;
+  border-radius:20px;
+  border:1px solid rgba(108,99,255,0.35);
+  background:rgba(108,99,255,0.1);
+  color:var(--accent);
+  margin-bottom:1rem;
+  cursor:pointer;
+  user-select:none;
+  transition:all 0.2s;
+}
+.entangle-on-badge.off { border-color:var(--border); background:var(--surface); color:var(--muted); }
+.entangle-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:var(--accent);
+  animation:wireGlow 1.2s ease-in-out infinite alternate;
+}
+.entangle-on-badge.off .entangle-dot { background:var(--muted); animation:none; }
+
+/* ── INTERFERENCE ── */
+.wave-arena {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:2rem;
+  margin-bottom:2rem;
+}
+.wave-controls {
+  display:flex; gap:1.5rem; flex-wrap:wrap; margin-bottom:1.2rem;
+}
+.wave-ctrl { flex:1; min-width:160px; }
+.wave-ctrl label {
+  display:block;
+  font-family:'Space Mono',monospace;
+  font-size:0.7rem; letter-spacing:0.1em;
+  margin-bottom:0.4rem;
+}
+.wave-ctrl label.lbl-a { color:var(--accent); }
+.wave-ctrl label.lbl-b { color:var(--accent3); }
+.wave-ctrl label.lbl-result { color:var(--accent2); }
+#wave-canvas { width:100%; display:block; border-radius:6px; background:#080A18; }
+.wave-legend {
+  display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:0.75rem;
+  font-family:'Space Mono',monospace; font-size:0.72rem;
+}
+.legend-dot { display:inline-block; width:12px; height:3px; border-radius:2px; vertical-align:middle; margin-right:0.4rem; }
+.interference-type {
+  display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;
+}
+.itype-btn {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:0.78rem; font-weight:600;
+  padding:0.4rem 0.9rem;
+  border-radius:5px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--muted);
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.itype-btn.active { border-color:var(--accent2); color:var(--accent2); background:rgba(0,212,170,0.1); }
+.itype-btn:hover { border-color:var(--accent2); color:var(--accent2); }
+</style>
+
+<section id="sec1">
+<div class="container">
+  <div class="module-header">
+    <div class="module-tag"><span>01</span> Module One · 0–12 min</div>
+    <h2>Quantum Computing<br>Fundamentals</h2>
+    <p class="module-desc">Three weird properties that make quantum computers fundamentally different — explained with a coin, two dice, and waves.</p>
+  </div>
+
+  <!-- ════════ 1. SUPERPOSITION — COIN ════════ -->
+  <div class="coin-arena">
+    <h3>🪙 Property 1 — Superposition</h3>
+    <p class="sub">
+      A classical coin is either <strong>Heads</strong> (0) or <strong>Tails</strong> (1). You know exactly which one.
+      A <em>quantum coin</em> — while in flight — is <strong>both at once</strong>. It only "picks" a side when you look at it (measure it).
+      This is what a qubit does. The qubit lives in superposition: <code style="color:var(--accent)">α|0⟩ + β|1⟩</code>.
+      <br><br>Click the classical coin to toss it deterministically. Click the quantum coin — it spins in superposition, and collapses to a result only when you observe it.
+    </p>
+
+    <div class="coin-stage">
+      <!-- CLASSICAL COIN -->
+      <div class="coin-wrap">
+        <div class="coin-label" style="color:var(--accent4);">Classical Bit</div>
+        <div class="coin" id="classic-coin" onclick="tossClassic()">
+          <div class="coin-inner" id="classic-inner">
+            <div class="coin-face heads">H</div>
+            <div class="coin-face tails">T</div>
+          </div>
+        </div>
+        <div class="coin-state-bar">
+          <div class="coin-state-fill" id="classic-fill" style="width:100%;background:var(--accent4);"></div>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.8rem;margin-top:0.3rem;" id="classic-txt">HEADS (0)</div>
+        <div class="prob-bars" id="classic-bars">
+          <div class="prob-bar-wrap">
+            <div class="prob-bar-val" id="cp0" style="color:var(--accent4)">100%</div>
+            <div class="prob-bar" id="cpb0" style="height:54px;background:var(--accent4);"></div>
+            <div class="prob-bar-label">H</div>
+          </div>
+          <div class="prob-bar-wrap">
+            <div class="prob-bar-val" id="cp1" style="color:var(--muted)">0%</div>
+            <div class="prob-bar" id="cpb1" style="height:2px;background:var(--muted);"></div>
+            <div class="prob-bar-label">T</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARROW -->
+      <div style="text-align:center;">
+        <div style="font-size:1.6rem;color:var(--border);">↔</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--muted);margin-top:0.3rem;">vs</div>
+      </div>
+
+      <!-- QUANTUM COIN -->
+      <div class="coin-wrap">
+        <div class="coin-label" style="color:var(--accent);">Qubit</div>
+        <div class="coin quantum superposed" id="quantum-coin" onclick="tossQuantum()">
+          <div class="coin-inner" id="quantum-inner">
+            <div class="coin-face heads">|0⟩</div>
+            <div class="coin-face tails">|1⟩</div>
+          </div>
+        </div>
+        <div class="coin-state-bar">
+          <div class="coin-state-fill" id="quantum-fill" style="width:50%;background:linear-gradient(90deg,var(--accent),var(--accent2));"></div>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.8rem;margin-top:0.3rem;" id="quantum-txt">SUPERPOSED ✦</div>
+        <div class="prob-bars" id="quantum-bars">
+          <div class="prob-bar-wrap">
+            <div class="prob-bar-val" id="qp0" style="color:var(--accent)">50%</div>
+            <div class="prob-bar" id="qpb0" style="height:27px;background:var(--accent);"></div>
+            <div class="prob-bar-label">|0⟩</div>
+          </div>
+          <div class="prob-bar-wrap">
+            <div class="prob-bar-val" id="qp1" style="color:var(--accent2)">50%</div>
+            <div class="prob-bar" id="qpb1" style="height:27px;background:var(--accent2);"></div>
+            <div class="prob-bar-label">|1⟩</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="coin-btns">
+      <button class="coin-btn primary" onclick="tossQuantum()">⚡ Click Qubit to Observe / Restore</button>
+      <button class="coin-btn" onclick="tossClassic()">Toss Classical Coin</button>
+    </div>
+
+    <div class="coin-explainer" id="coin-explainer">
+      <strong style="color:var(--accent)">The quantum coin is flickering</strong> — it is genuinely in <em>both |0⟩ and |1⟩ simultaneously</em>, switching between them too fast to pin down. The glow shifts between purple (|0⟩) and teal (|1⟩). Click the coin — or the button — to <strong>observe it</strong> and collapse the superposition to one definite state. Click it again to restore superposition.
+    </div>
+
+    <div class="coin-stats">
+      <div class="coin-stat">Classical tosses: <span id="c-tosses">0</span></div>
+      <div class="coin-stat">Quantum measurements: <span id="q-tosses">0</span></div>
+      <div class="coin-stat">|0⟩ outcomes: <span id="q-heads">0</span></div>
+      <div class="coin-stat">|1⟩ outcomes: <span id="q-tails">0</span></div>
+    </div>
+
+    <div class="insight" style="margin-top:1rem;">
+      <strong>The quantum insight:</strong> Before measurement, the qubit holds <em>both possibilities</em> simultaneously. A 3-qubit system can be in 8 states at once; 300 qubits hold 2³⁰⁰ states — more than atoms in the universe. That's quantum parallelism.
+    </div>
+  </div>
+
+  <!-- ════════ 2. ENTANGLEMENT — DICE ════════ -->
+  <div class="dice-arena">
+    <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:0.4rem;">🎲 Property 2 — Entanglement</h3>
+    <p style="font-size:0.82rem;color:var(--muted);line-height:1.6;margin-bottom:1.2rem;">
+      Imagine two magical dice. When entangled, rolling one <em>instantly</em> determines the other — no matter how far apart they are. The two are <strong>correlated beyond classical physics</strong>. In quantum computing, entangled qubits share a joint state that cannot be described independently. Einstein called it <em>"spooky action at a distance"</em> — but it's real and experimentally verified.
+    </p>
+
+    <div style="display:flex; justify-content:center; margin-bottom:0.75rem;">
+      <div class="entangle-on-badge" id="entangle-toggle" onclick="toggleEntangle()">
+        <div class="entangle-dot" id="e-dot"></div>
+        <span id="e-label">ENTANGLEMENT: ON</span>
+      </div>
+    </div>
+
+    <p class="dice-hint" id="dice-hint">Click either die to roll it — watch what happens to the other ✦</p>
+
+    <div class="entangle-link">
+      <!-- DICE A -->
+      <div class="dice-scene">
+        <div class="dice-label" style="color:var(--accent);">Qubit A · Alice</div>
+        <div class="dice" id="diceA" onclick="rollDice('A')">
+          <div class="dice-inner" id="diceA-inner">
+            <div class="dice-face d-front">⚀</div>
+            <div class="dice-face d-back">⚅</div>
+            <div class="dice-face d-right">⚂</div>
+            <div class="dice-face d-left">⚃</div>
+            <div class="dice-face d-top">⚁</div>
+            <div class="dice-face d-bot">⚄</div>
+          </div>
+        </div>
+        <div class="dice-value-display" id="diceA-val" style="color:var(--accent);">?</div>
+      </div>
+
+      <!-- WIRE -->
+      <div class="entangle-wire" id="e-wire-left"></div>
+      <div class="entangle-center-icon" id="e-icon">🔗</div>
+      <div class="entangle-wire" id="e-wire-right"></div>
+
+      <!-- DICE B -->
+      <div class="dice-scene">
+        <div class="dice-label" style="color:var(--accent2);">Qubit B · Bob</div>
+        <div class="dice" id="diceB" onclick="rollDice('B')">
+          <div class="dice-inner" id="diceB-inner">
+            <div class="dice-face d-front">⚀</div>
+            <div class="dice-face d-back">⚅</div>
+            <div class="dice-face d-right">⚂</div>
+            <div class="dice-face d-left">⚃</div>
+            <div class="dice-face d-top">⚁</div>
+            <div class="dice-face d-bot">⚄</div>
+          </div>
+        </div>
+        <div class="dice-value-display" id="diceB-val" style="color:var(--accent2);">?</div>
+      </div>
+    </div>
+
+    <div class="dice-reveal" id="dice-reveal">
+      Roll either die above to see entanglement in action. With entanglement ON, both dice will always produce the same number — even though each looks random individually.
+    </div>
+
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;font-family:'Space Mono',monospace;font-size:0.75rem;">
+      <div style="color:var(--muted)">Rolls: <span style="color:var(--accent2)" id="d-total">0</span></div>
+      <div style="color:var(--muted)">Matched (entangled): <span style="color:var(--accent2)" id="d-match">0</span></div>
+      <div style="color:var(--muted)">Random matches (classical): <span style="color:var(--accent4)" id="d-rand">0</span></div>
+    </div>
+
+    <div class="insight" style="margin-top:1rem; border-color:rgba(0,212,170,0.35);background:rgba(0,212,170,0.05);">
+      <strong>The quantum insight:</strong> The entangled dice don't secretly "agree" before you roll — they genuinely don't have a value until measured. Bell's theorem proves this isn't just "hidden information." The correlation is quantum, not classical. This is what powers quantum teleportation and quantum key distribution.
+    </div>
+  </div>
+
+  <!-- ════════ 3. INTERFERENCE — WAVES ════════ -->
+  <div class="wave-arena">
+    <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:0.4rem;">🌊 Property 3 — Interference</h3>
+    <p style="font-size:0.82rem;color:var(--muted);line-height:1.6;margin-bottom:1.2rem;">
+      Quantum states are <strong>waves</strong>, not just particles. When two quantum paths overlap, they can <em>constructively interfere</em> (amplify correct answers) or <em>destructively interfere</em> (cancel wrong answers). Quantum algorithms are choreographed interference patterns — they boost the probability of the <em>right answer</em> and kill off the <em>wrong ones</em>.
+    </p>
+
+    <div class="interference-type">
+      <button class="itype-btn active" onclick="setIType('constructive',this)">✦ Constructive</button>
+      <button class="itype-btn" onclick="setIType('destructive',this)">✗ Destructive</button>
+      <button class="itype-btn" onclick="setIType('partial',this)">~ Partial</button>
+      <button class="itype-btn" onclick="setIType('free',this)">⚙ Free Mode</button>
+    </div>
+
+    <div class="wave-controls" id="wave-controls-free" style="display:none;">
+      <div class="wave-ctrl">
+        <label class="lbl-a">Wave A — Amplitude</label>
+        <input type="range" id="wA-amp" min="5" max="60" value="40" oninput="drawWaves()">
+      </div>
+      <div class="wave-ctrl">
+        <label class="lbl-a">Wave A — Frequency</label>
+        <input type="range" id="wA-freq" min="1" max="5" value="2" step="0.5" oninput="drawWaves()">
+      </div>
+      <div class="wave-ctrl">
+        <label class="lbl-b">Wave B — Phase Shift</label>
+        <input type="range" id="wB-phase" min="0" max="360" value="0" oninput="drawWaves()">
+      </div>
+      <div class="wave-ctrl">
+        <label class="lbl-b">Wave B — Amplitude</label>
+        <input type="range" id="wB-amp" min="5" max="60" value="40" oninput="drawWaves()">
+      </div>
+    </div>
+
+    <canvas id="wave-canvas" height="200"></canvas>
+
+    <div class="wave-legend">
+      <div><span class="legend-dot" style="background:var(--accent);display:inline-block;"></span><span style="color:var(--accent)">Wave A</span> — Quantum path 1 (probability amplitude)</div>
+      <div><span class="legend-dot" style="background:var(--accent3);display:inline-block;"></span><span style="color:var(--accent3)">Wave B</span> — Quantum path 2</div>
+      <div><span class="legend-dot" style="background:var(--accent2);display:inline-block;"></span><span style="color:var(--accent2)">Result</span> — Combined wave (what you measure)</div>
+    </div>
+
+    <div class="insight" style="margin-top:1rem; border-color:rgba(255,107,107,0.35);background:rgba(255,107,107,0.05);">
+      <strong>Why this matters for algorithms:</strong> Grover's search and Shor's factoring algorithm both work by engineering interference — wrong answer paths destructively cancel, correct answer paths constructively amplify. This is the engine behind quantum speedup.
+    </div>
+  </div>
+
+  <!-- BLOCH SPHERE VISUALIZER -->
+  <div class="viz-block">
+    <h3>🌐 Putting it Together — Bloch Sphere Visualizer</h3>
+    <p>Every qubit state lives on the surface of a sphere. North pole = |0⟩, South pole = |1⟩, equator = superposition. The <em>phase</em> (angle around the equator) encodes interference information. Drag the sliders to see how these properties connect.</p>
+    <canvas id="qubit-canvas" height="280"></canvas>
+    <div class="slider-row">
+      <div class="slider-group">
+        <label>θ (THETA) — polar angle (superposition mix)</label>
+        <input type="range" id="sl-theta" min="0" max="180" value="45" oninput="drawBloch()">
+        <div class="slider-val" id="sv-theta">45°</div>
+      </div>
+      <div class="slider-group">
+        <label>φ (PHI) — azimuthal angle (phase / interference)</label>
+        <input type="range" id="sl-phi" min="0" max="360" value="60" oninput="drawBloch()">
+        <div class="slider-val" id="sv-phi">60°</div>
+      </div>
+    </div>
+    <div class="formula" id="bloch-state">|ψ⟩ = cos(22.5°)|0⟩ + e^(i60°)sin(22.5°)|1⟩</div>
+  </div>
+
+  <!-- GATE SIMULATOR -->
+  <div class="gate-sim">
+    <h3 style="font-size:1rem;font-weight:600;margin-bottom:0.5rem;">⚙️ Quantum Gate Simulator</h3>
+    <p style="font-size:0.83rem;color:var(--muted);margin-bottom:1rem;">Start in |0⟩ state, apply gates in sequence, observe state evolution.</p>
+    <div class="gate-row">
+      <button class="gate-btn" onclick="applyGate('reset')">↺ Reset</button>
+      <button class="gate-btn" onclick="applyGate('H')">H (Hadamard)</button>
+      <button class="gate-btn" onclick="applyGate('X')">X (NOT)</button>
+      <button class="gate-btn" onclick="applyGate('Y')">Y</button>
+      <button class="gate-btn" onclick="applyGate('Z')">Z</button>
+      <button class="gate-btn" onclick="applyGate('S')">S (√Z)</button>
+      <button class="gate-btn" onclick="applyGate('T')">T (π/8)</button>
+      <button class="gate-btn" onclick="applyGate('measure')">⚡ Measure</button>
+    </div>
+    <div class="gate-output" id="gate-output">State: |0⟩
+α = 1.000 + 0.000i
+β = 0.000 + 0.000i
+P(|0⟩) = 100.00%   P(|1⟩) = 0.00%
+Applied: —</div>
+  </div>
+
+  <!-- CLASSICAL vs QUANTUM -->
+  <h3 style="font-size:1rem;font-weight:600;margin-bottom:1rem;margin-top:0.5rem;">Classical vs Quantum Computing</h3>
+  <table class="compare-table">
+    <thead><tr><th>Property</th><th>Classical</th><th>Quantum</th></tr></thead>
+    <tbody>
+      <tr><td>Basic unit</td><td>Bit (0 or 1)</td><td>Qubit (superposition)</td></tr>
+      <tr><td>Processing</td><td>Sequential / parallel threads</td><td>Quantum parallelism (all states at once)</td></tr>
+      <tr><td>Factoring 2048-bit number</td><td><span class="badge badge-bad">~billions of years</span></td><td><span class="badge badge-good">Hours (Shor's algorithm)</span></td></tr>
+      <tr><td>Database search (N items)</td><td>O(N) linear</td><td><span class="badge badge-good">O(√N) Grover's algo</span></td></tr>
+      <tr><td>Error rate</td><td>~10⁻¹⁵</td><td><span class="badge badge-warn">~0.1–1% (NISQ era)</span></td></tr>
+      <tr><td>Temperature needed</td><td>Room temp</td><td>~0.015 K (superconducting)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="insight">
+    <strong>NISQ Era:</strong> We are in the Noisy Intermediate-Scale Quantum era — 50–1000 qubit machines with significant error rates. Fault-tolerant QC is still ~10 years away, but QML algorithms are being designed for NISQ hardware today.
+  </div>
+
+  <button class="start-btn" onclick="goto(2)" style="margin-top:1rem;">Next: Quantum ML →</button>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════ SECTION 2: QML -->
+<section id="sec2">
+<div class="container">
+  <div class="module-header">
+    <div class="module-tag"><span>02</span> Module Two · 12–28 min</div>
+    <h2>Quantum Machine<br>Learning</h2>
+    <p class="module-desc">Classical ML hits walls. QML proposes a new compute paradigm for AI.</p>
+  </div>
+
+  <div class="insight">
+    <strong>What is QML?</strong> Quantum Machine Learning uses quantum circuits as learnable models — think of a parameterized quantum circuit (PQC) as a neural network where the "neurons" are quantum gates and "weights" are rotation angles. Training happens via quantum-classical hybrid loops.
+  </div>
+
+  <div class="card-grid">
+    <div class="card card-accent">
+      <div class="card-icon">🧬</div>
+      <h3>Variational Quantum Circuits (VQC)</h3>
+      <p>Parameterized circuits trained using gradient descent. The circuit encodes data, applies trainable rotations, and measures expectation values as output — a quantum neural network.</p>
+    </div>
+    <div class="card card-accent2">
+      <div class="card-icon">🎯</div>
+      <h3>QAOA</h3>
+      <p><strong>Quantum Approximate Optimization Algorithm.</strong> Solves combinatorial optimization problems (graph coloring, traveling salesman, portfolio optimization) using quantum interference to find near-optimal solutions.</p>
+    </div>
+    <div class="card card-accent3">
+      <div class="card-icon">🔑</div>
+      <h3>Quantum Kernel Methods</h3>
+      <p>Maps data into exponentially large Hilbert space via quantum feature maps. Kernel matrix computed on quantum hardware — classical SVM runs on top. Theoretical advantage for certain datasets.</p>
+    </div>
+    <div class="card card-accent4">
+      <div class="card-icon">⚡</div>
+      <h3>Quantum Sampling & Generative Models</h3>
+      <p>Quantum Boltzmann Machines and quantum GANs leverage quantum sampling advantages. Born machines sample from distributions that are #P-hard to sample classically.</p>
+    </div>
+  </div>
+
+  <!-- VQC CIRCUIT VISUAL -->
+  <div class="viz-block">
+    <h3>⬡ Variational Quantum Circuit — Architecture</h3>
+    <p>A PQC has three parts: <em>data encoding layer</em> (encode classical data into qubit angles), <em>variational ansatz</em> (trainable rotation gates), and <em>measurement</em> (collapses to classical output for loss computation).</p>
+    <canvas id="circuit-canvas" height="200"></canvas>
+  </div>
+
+  <!-- WHY QML -->
+  <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 1rem;">Why QML? The Relevance for AI</h3>
+  <div class="two-col">
+    <div>
+      <div class="accordion">
+        <button class="accordion-head" onclick="toggleAcc(this)">Exponential State Space <span class="chevron">▼</span></button>
+        <div class="accordion-body">n qubits represent 2ⁿ dimensional Hilbert space. A 50-qubit system explores 2⁵⁰ ≈ 10¹⁵ states simultaneously — classically impossible. This exponential expressibility may provide advantage for high-dimensional ML tasks like drug discovery and materials science.</div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-head" onclick="toggleAcc(this)">Faster Linear Algebra (HHL) <span class="chevron">▼</span></button>
+        <div class="accordion-body">The HHL algorithm (Harrow-Hassidim-Lloyd) solves linear systems Ax=b in O(log N) vs classical O(N) — exponential speedup. Since neural networks fundamentally rely on matrix operations, this is transformative IF quantum RAM bottlenecks can be overcome.</div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-head" onclick="toggleAcc(this)">Quantum-enhanced Optimization <span class="chevron">▼</span></button>
+        <div class="accordion-body">Training deep networks involves non-convex optimization plagued by local minima and saddle points. Quantum tunneling in quantum annealing and QAOA can escape local minima — potentially leading to better optima in fewer steps.</div>
+      </div>
+    </div>
+    <div>
+      <div class="accordion">
+        <button class="accordion-head" onclick="toggleAcc(this)">Quantum Natural Language Processing <span class="chevron">▼</span></button>
+        <div class="accordion-body">Grammar structures and sentence diagrams map naturally to quantum circuits via DisCoCat (Distributional Compositional Categorical) models. Companies like Quantinuum are building QNLP systems — a fundamentally new way to represent meaning.</div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-head" onclick="toggleAcc(this)">Quantum Advantage for Chemistry & Drug Discovery <span class="chevron">▼</span></button>
+        <div class="accordion-body">Simulating molecular Hamiltonians is exponentially hard classically but natural for quantum computers. Google's Sycamore and IBM's systems already simulate small molecules. This directly impacts AI-driven drug discovery (AlphaFold meets quantum chemistry).</div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-head" onclick="toggleAcc(this)">Quantum Federated Learning <span class="chevron">▼</span></button>
+        <div class="accordion-body">Quantum secure multiparty computation allows distributed ML training with provable privacy guarantees — the model is trained without any party revealing their data, using quantum cryptographic protocols.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPEEDUP TABLE -->
+  <h3 style="font-size:1rem;font-weight:600;margin:1rem 0 1rem;">Quantum Algorithm Speedups Relevant to ML</h3>
+  <table class="compare-table">
+    <thead><tr><th>Algorithm</th><th>Classical Complexity</th><th>Quantum Complexity</th><th>ML Application</th></tr></thead>
+    <tbody>
+      <tr><td>Grover's Search</td><td>O(N)</td><td><span class="badge badge-good">O(√N)</span></td><td>Nearest neighbor search, optimization</td></tr>
+      <tr><td>HHL (Linear Systems)</td><td>O(N³)</td><td><span class="badge badge-good">O(log N) *</span></td><td>Regression, matrix inversion</td></tr>
+      <tr><td>Quantum PCA</td><td>O(N²)</td><td><span class="badge badge-good">O(log N) *</span></td><td>Dimensionality reduction</td></tr>
+      <tr><td>Quantum SVM</td><td>O(N·d)</td><td><span class="badge badge-good">O(log(N·d))</span></td><td>Classification</td></tr>
+      <tr><td>Shor's Factoring</td><td>O(e^N^(1/3))</td><td><span class="badge badge-good">O(N³ log N)</span></td><td>Cryptanalysis</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.75rem;color:var(--muted);margin-bottom:2rem;">* Subject to quantum RAM (QRAM) assumptions — active research area.</p>
+
+  <div class="insight" style="border-color:rgba(0,212,170,0.35);background:rgba(0,212,170,0.05);">
+    <strong>Current Challenges:</strong> Barren plateaus (vanishing gradients in deep PQCs), decoherence, limited qubit connectivity, high error rates. QML is theoretically promising but practically constrained to small NISQ devices. Hybrid quantum-classical approaches bridge the gap.
+  </div>
+
+  <button class="start-btn" onclick="goto(3)" style="margin-top:1rem;">Next: Quantum Cryptography →</button>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════ SECTION 3: CRYPTO -->
+<section id="sec3">
+<div class="container">
+  <div class="module-header">
+    <div class="module-tag"><span>03</span> Module Three · 28–48 min</div>
+    <h2>Post-Quantum<br>Cryptography</h2>
+    <p class="module-desc">Quantum computers will break RSA and ECC. NIST has a plan. Lattices are the answer.</p>
+  </div>
+
+  <div class="insight" style="border-color:rgba(255,107,107,0.4);background:rgba(255,107,107,0.06);">
+    <strong>⚠️ The Threat:</strong> Shor's algorithm running on a sufficiently powerful quantum computer can break RSA-2048 in hours. The same goes for Elliptic Curve Cryptography (ECC). All internet traffic secured by HTTPS today could be retroactively decrypted — a threat called "harvest now, decrypt later."
+  </div>
+
+  <!-- TIMELINE -->
+  <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 1rem;">Timeline: Cryptography & Quantum Threat</h3>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">1977</div>
+      <div class="tl-title">RSA Algorithm Published</div>
+      <div class="tl-desc">Rivest-Shamir-Adleman — security based on difficulty of integer factorization. Becomes backbone of internet security for decades.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot accent2"></div>
+      <div class="tl-year">1994</div>
+      <div class="tl-title">Shor's Algorithm</div>
+      <div class="tl-desc">Peter Shor proves quantum computers can factor integers in polynomial time — RSA's theoretical death warrant is signed.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot accent4"></div>
+      <div class="tl-year">2016</div>
+      <div class="tl-title">NIST Begins PQC Standardization</div>
+      <div class="tl-desc">National Institute of Standards and Technology launches a global competition for post-quantum cryptographic algorithms. 69 submissions received.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot accent2"></div>
+      <div class="tl-year">2022</div>
+      <div class="tl-title">NIST Selects Final Candidates</div>
+      <div class="tl-desc">CRYSTALS-Kyber, CRYSTALS-Dilithium, FALCON, SPHINCS+ selected for standardization. Lattice-based algorithms dominate.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot accent3"></div>
+      <div class="tl-year">2024</div>
+      <div class="tl-title">NIST PQC Standards Finalized</div>
+      <div class="tl-desc">FIPS 203 (ML-KEM / Kyber), FIPS 204 (ML-DSA / Dilithium), FIPS 205 (SLH-DSA / SPHINCS+) officially published. Transition begins.</div>
+    </div>
+  </div>
+
+  <!-- LATTICE VISUAL -->
+  <div class="lattice-demo">
+    <h3 style="font-size:1rem;font-weight:600;margin-bottom:0.5rem;">🔷 Lattice Cryptography — Visualized</h3>
+    <p style="font-size:0.83rem;color:var(--muted);margin-bottom:1rem;">A lattice is a regular grid of points in high-dimensional space. The hard problem: given a "noisy" target point, find the <em>closest lattice point</em> — this is the Learning With Errors (LWE) problem, believed to resist quantum attack.</p>
+    <canvas id="lattice-canvas" height="280"></canvas>
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:0.75rem;">Blue dots = lattice points · Red = secret target · Orange = noisy observation · Dashed = shortest vector (hard to find in 1000+ dimensions)</p>
+  </div>
+
+  <!-- HARD PROBLEMS -->
+  <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 1rem;">Post-Quantum Hard Problems</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <div class="card-icon">🔷</div>
+      <h3>LWE — Learning With Errors</h3>
+      <p>Given A and b = As + e (mod q) where e is small random noise, find secret vector s. Reducing this to lattice problems makes it quantum-resistant. Basis of Kyber (ML-KEM).</p>
+      <div class="formula" style="font-size:0.75rem;padding:0.6rem 0.9rem;margin-top:0.5rem;">b = As + e (mod q)</div>
+    </div>
+    <div class="card card-accent2">
+      <div class="card-icon">🔢</div>
+      <h3>RLWE — Ring-LWE</h3>
+      <p>LWE over polynomial rings — far more efficient with smaller key sizes. Ring structure allows use of NTT (Number Theoretic Transform) for fast arithmetic. Powers Dilithium & Kyber.</p>
+    </div>
+    <div class="card card-accent3">
+      <div class="card-icon">🌲</div>
+      <h3>Hash-Based Signatures</h3>
+      <p>SPHINCS+ uses only hash functions (SHA-3 / SHAKE-256) — security relies solely on hash collision resistance, well-understood for decades. Larger signatures but maximum trust.</p>
+    </div>
+    <div class="card card-accent4">
+      <div class="card-icon">🔐</div>
+      <h3>Code-Based Cryptography</h3>
+      <p>McEliece (1978!) based on decoding random linear codes. NIST alternate candidate HQC uses this. Huge key sizes historically, but quantum-resistant since the 70s.</p>
+    </div>
+  </div>
+
+  <!-- NIST WINNERS TABLE -->
+  <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 1rem;">NIST PQC Finalized Standards (2024)</h3>
+  <table class="compare-table">
+    <thead><tr><th>Standard</th><th>Algorithm</th><th>Type</th><th>Use Case</th><th>Security Basis</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-good">FIPS 203</span></td>
+        <td>ML-KEM (Kyber)</td>
+        <td>KEM</td>
+        <td>Key encapsulation, TLS</td>
+        <td>Module-LWE</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-good">FIPS 204</span></td>
+        <td>ML-DSA (Dilithium)</td>
+        <td>Digital Signature</td>
+        <td>Document signing, code signing</td>
+        <td>Module-LWE + SIS</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-good">FIPS 205</span></td>
+        <td>SLH-DSA (SPHINCS+)</td>
+        <td>Digital Signature</td>
+        <td>Long-term signatures</td>
+        <td>Hash functions only</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-warn">Alternate</span></td>
+        <td>FALCON (FN-DSA)</td>
+        <td>Digital Signature</td>
+        <td>Compact signatures</td>
+        <td>NTRU lattices</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="insight">
+    <strong>Why Lattices Win:</strong> Lattice problems (SVP, CVP, LWE) have no known quantum speedup beyond √2 (Grover-like). Even a 10,000-qubit fault-tolerant quantum computer cannot break CRYSTALS-Kyber with 256-bit security. This makes lattice crypto the most future-proof option known today.
+  </div>
+
+  <!-- QKD -->
+  <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 0.5rem;">Bonus: Quantum Key Distribution (QKD)</h3>
+  <div class="card-grid" style="grid-template-columns:1fr 1fr;">
+    <div class="card card-accent2">
+      <div class="card-icon">📡</div>
+      <h3>BB84 Protocol</h3>
+      <p>Alice sends qubits in random polarizations. Any eavesdropping by Eve disturbs the quantum states (no-cloning theorem), revealing her presence. Provably secure by physics, not math.</p>
+    </div>
+    <div class="card card-accent">
+      <div class="card-icon">🛰️</div>
+      <h3>QKD vs PQC</h3>
+      <p>QKD is <em>hardware-dependent</em> (fiber/satellite, expensive, short range) vs PQC which is pure software. For most applications, PQC (NIST standards) is the practical path forward.</p>
+    </div>
+  </div>
+
+  <button class="start-btn" onclick="goto(4)" style="margin-top:1rem;">Next: Learning Platforms →</button>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════ SECTION 4: PLATFORMS -->
+<section id="sec4">
+<div class="container">
+  <div class="module-header">
+    <div class="module-tag"><span>04</span> Module Four · 48–56 min</div>
+    <h2>Quantum Computing<br>Learning Platforms</h2>
+    <p class="module-desc">You don't need a quantum computer to learn quantum computing. Here's where to start.</p>
+  </div>
+
+  <div class="platform-grid">
+    <div class="platform-card">
+      <div class="platform-logo">IBM Quantum</div>
+      <div class="platform-type">Cloud · Real Hardware + Simulator</div>
+      <p>Free access to real quantum processors (127+ qubit Eagle, 133-qubit Heron). Qiskit SDK in Python. Composer GUI for circuit drag-and-drop. Best for getting hands-on quickly.</p>
+      <div><span class="platform-tag">quantum.ibm.com</span> <span class="platform-tag" style="color:var(--accent2);border-color:rgba(0,212,170,0.2);background:rgba(0,212,170,0.08);">Free Tier</span></div>
+    </div>
+    <div class="platform-card">
+      <div class="platform-logo">Qiskit</div>
+      <div class="platform-type">Open Source SDK · Python</div>
+      <p>IBM's open-source quantum SDK. Qiskit Terra (circuits), Qiskit Aer (simulation), Qiskit Nature (chemistry), Qiskit ML (quantum ML primitives). Largest community ecosystem.</p>
+      <div><span class="platform-tag">qiskit.org</span> <span class="platform-tag" style="color:var(--accent2);border-color:rgba(0,212,170,0.2);background:rgba(0,212,170,0.08);">Open Source</span></div>
+    </div>
+    <div class="platform-card">
+      <div class="platform-logo">PennyLane</div>
+      <div class="platform-type">QML Framework · Xanadu</div>
+      <p>Best framework for Quantum Machine Learning. Automatic differentiation through quantum circuits, integrates with PyTorch and TensorFlow. JAX backend available. QML-first design.</p>
+      <div><span class="platform-tag">pennylane.ai</span> <span class="platform-tag" style="color:var(--accent2);border-color:rgba(0,212,170,0.2);background:rgba(0,212,170,0.08);">Open Source</span></div>
+    </div>
+    <div class="platform-card">
+      <div class="platform-logo">Google Cirq</div>
+      <div class="platform-type">Framework · Google Research</div>
+      <p>Google's quantum circuit library. Designed for NISQ algorithms. Powers Sycamore experiments. TFQ (TensorFlow Quantum) built on top for hybrid ML. Great docs and research focus.</p>
+      <div><span class="platform-tag">quantumai.google</span> <span class="platform-tag" style="color:var(--accent2);border-color:rgba(0,212,170,0.2);background:rgba(0,212,170,0.08);">Open Source</span></div>
+    </div>
+    <div class="platform-card">
+      <div class="platform-logo">AWS Braket</div>
+      <div class="platform-type">Cloud · Multi-Hardware</div>
+      <p>Access IonQ (trapped ion), Rigetti (superconducting), Oxford Quantum Circuits hardware, plus managed simulators. Pay-per-use. Great for research teams comparing hardware paradigms.</p>
+      <div><span class="platform-tag">aws.amazon.com/braket</span> <span class="platform-tag" style="color:var(--accent4);border-color:rgba(255,179,71,0.2);background:rgba(255,179,71,0.08);">Paid</span></div>
+    </div>
+    <div class="platform-card">
+      <div class="platform-logo">Quirk</div>
+      <div class="platform-type">Browser Simulator · No Install</div>
+      <p>Drag-and-drop quantum circuit simulator that runs entirely in the browser. No account, no install. Perfect for classroom demonstrations and intuition building. Real-time state visualization.</p>
+      <div><span class="platform-tag">algassert.com/quirk</span> <span class="platform-tag" style="color:var(--accent2);border-color:rgba(0,212,170,0.2);background:rgba(0,212,170,0.08);">Free · No Login</span></div>
+    </div>
+    <div class="platform-card">
+      <div class="platform-logo">Quantum Katas</div>
+      <div class="platform-type">Learning · Microsoft Q#</div>
+      <p>Microsoft's self-paced quantum programming tutorials using Q# language. Jupyter notebooks covering superposition, measurements, quantum oracles, Grover's algorithm. Excellent pedagogy.</p>
+      <div><span class="platform-tag">github.com/microsoft/QuantumKatas</span></div>
+    </div>
+    <div class="platform-card">
+      <div class="platform-logo">IBMQ Learning</div>
+      <div class="platform-type">Course Platform</div>
+      <p>Free structured courses: "Introduction to Quantum Computing," "Understanding Quantum Information," "Quantum Machine Learning." Certificates available. Badges through Credly.</p>
+      <div><span class="platform-tag">learning.quantum.ibm.com</span> <span class="platform-tag" style="color:var(--accent2);border-color:rgba(0,212,170,0.2);background:rgba(0,212,170,0.08);">Free Cert</span></div>
+    </div>
+  </div>
+
+  <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 1rem;">Recommended Learning Path</h3>
+  <table class="compare-table">
+    <thead><tr><th>Week</th><th>Topic</th><th>Resource</th><th>Time</th></tr></thead>
+    <tbody>
+      <tr><td>1–2</td><td>Quantum fundamentals (math-light)</td><td>IBM Quantum Learning: Intro course</td><td>4 hrs</td></tr>
+      <tr><td>3–4</td><td>First circuits in Python</td><td>Qiskit textbook + Quirk sandbox</td><td>6 hrs</td></tr>
+      <tr><td>5–6</td><td>Quantum gates & algorithms</td><td>Microsoft Quantum Katas</td><td>8 hrs</td></tr>
+      <tr><td>7–8</td><td>VQC & quantum ML basics</td><td>PennyLane tutorials</td><td>6 hrs</td></tr>
+      <tr><td>9–10</td><td>Run on real quantum hardware</td><td>IBM Quantum (free access)</td><td>4 hrs</td></tr>
+      <tr><td>11–12</td><td>PQC & NIST algorithms</td><td>NIST documentation + liboqs</td><td>4 hrs</td></tr>
+    </tbody>
+  </table>
+
+  <button class="start-btn" onclick="goto(5)" style="margin-top:1rem;">Final: Quiz & Discussion →</button>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════ SECTION 5: QUIZ -->
+<section id="sec5">
+<div class="container">
+  <div class="module-header">
+    <div class="module-tag"><span>05</span> Module Five · 56–60 min</div>
+    <h2>Knowledge Check</h2>
+    <p class="module-desc">10 rapid questions across all modules. Answer together as a group.</p>
+  </div>
+
+  <div id="quiz-container"></div>
+  <div id="quiz-score" style="display:none;"></div>
+</div>
+</section>
+
+<script>
+// ══════════════ STARS
+const starsCanvas = document.getElementById('stars-bg');
+const sCtx = starsCanvas.getContext('2d');
+let stars = [];
+function resizeStars() {
+  starsCanvas.width = window.innerWidth;
+  starsCanvas.height = window.innerHeight;
+  stars = Array.from({length:160}, () => ({
+    x: Math.random()*starsCanvas.width,
+    y: Math.random()*starsCanvas.height,
+    r: Math.random()*1.2+0.2,
+    a: Math.random(),
+    s: (Math.random()-0.5)*0.002
+  }));
+}
+function animateStars() {
+  sCtx.clearRect(0,0,starsCanvas.width,starsCanvas.height);
+  sCtx.fillStyle='#05060F';
+  sCtx.fillRect(0,0,starsCanvas.width,starsCanvas.height);
+  stars.forEach(s => {
+    s.a += s.s;
+    if(s.a<=0||s.a>=1) s.s*=-1;
+    sCtx.beginPath();
+    sCtx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    sCtx.fillStyle=`rgba(${170+Math.random()*50},${180+Math.random()*40},${255},${s.a})`;
+    sCtx.fill();
+  });
+  requestAnimationFrame(animateStars);
+}
+resizeStars(); animateStars();
+window.addEventListener('resize', resizeStars);
+
+// ══════════════ NAV / SECTIONS
+const sections = document.querySelectorAll('section');
+const navBtns = document.querySelectorAll('.nav-tabs button');
+let current = 0;
+function goto(i) {
+  sections[current].classList.remove('active');
+  navBtns[current].classList.remove('active');
+  current = i;
+  sections[i].classList.add('active');
+  navBtns[i].classList.add('active');
+  document.getElementById('progress-fill').style.width = ((i/(sections.length-1))*100)+'%';
+  window.scrollTo(0,0);
+  if(i===1){ setTimeout(drawBloch,100); setTimeout(drawCircuit,200); }
+  if(i===2){ setTimeout(drawVQC,100); }
+  if(i===3){ setTimeout(drawLattice,100); }
+  if(i===5){ renderQuiz(); }
+}
+
+// ══════════════ TIMER
+let timerInterval = null, timerSeconds = 0, timerRunning = false;
+const timerBadge = document.getElementById('timer-badge');
+function toggleTimer() {
+  if(!timerRunning){
+    timerRunning = true;
+    timerInterval = setInterval(() => {
+      timerSeconds++;
+      const m = Math.floor(timerSeconds/60).toString().padStart(2,'0');
+      const s = (timerSeconds%60).toString().padStart(2,'0');
+      timerBadge.textContent = `⏱ ${m}:${s}`;
+      timerBadge.className = 'timer-badge running';
+    }, 1000);
+  } else {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    timerBadge.className = 'timer-badge';
+    timerBadge.textContent = `⏱ Paused`;
+  }
+}
+
+// ══════════════ BLOCH SPHERE
+function drawBloch() {
+  const canvas = document.getElementById('qubit-canvas');
+  if(!canvas) return;
+  canvas.width = canvas.offsetWidth * devicePixelRatio;
+  canvas.height = 280 * devicePixelRatio;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const W = canvas.offsetWidth, H = 280;
+  const cx = W/2, cy = H/2, R = Math.min(W,H)*0.38;
+
+  const theta = parseFloat(document.getElementById('sl-theta').value) * Math.PI/180;
+  const phi = parseFloat(document.getElementById('sl-phi').value) * Math.PI/180;
+  document.getElementById('sv-theta').textContent = document.getElementById('sl-theta').value + '°';
+  document.getElementById('sv-phi').textContent = document.getElementById('sl-phi').value + '°';
+
+  // Update formula
+  const t2 = (parseFloat(document.getElementById('sl-theta').value)/2).toFixed(1);
+  const phiD = document.getElementById('sl-phi').value;
+  document.getElementById('bloch-state').textContent = `|ψ⟩ = cos(${t2}°)|0⟩ + e^(i${phiD}°)sin(${t2}°)|1⟩`;
+
+  // Draw sphere
+  ctx.clearRect(0,0,W,H);
+
+  // glow
+  const grd = ctx.createRadialGradient(cx,cy,0,cx,cy,R+20);
+  grd.addColorStop(0,'rgba(108,99,255,0.08)');
+  grd.addColorStop(1,'transparent');
+  ctx.fillStyle = grd;
+  ctx.beginPath(); ctx.arc(cx,cy,R+20,0,Math.PI*2); ctx.fill();
+
+  // circle
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2);
+  ctx.strokeStyle = 'rgba(108,99,255,0.3)'; ctx.lineWidth=1.5; ctx.stroke();
+  // equator (ellipse)
+  ctx.beginPath(); ctx.ellipse(cx,cy,R,R*0.28,0,0,Math.PI*2);
+  ctx.strokeStyle = 'rgba(108,99,255,0.2)'; ctx.setLineDash([3,4]); ctx.lineWidth=1; ctx.stroke();
+  ctx.setLineDash([]);
+  // vertical axis
+  ctx.beginPath(); ctx.moveTo(cx,cy-R-12); ctx.lineTo(cx,cy+R+12);
+  ctx.strokeStyle='rgba(200,200,255,0.25)'; ctx.lineWidth=1; ctx.stroke();
+  // horizontal
+  ctx.beginPath(); ctx.moveTo(cx-R-12,cy); ctx.lineTo(cx+R+12,cy);
+  ctx.strokeStyle='rgba(200,200,255,0.25)'; ctx.lineWidth=1; ctx.stroke();
+
+  // labels
+  ctx.fillStyle='rgba(200,200,255,0.6)'; ctx.font='bold 13px Space Mono,monospace'; ctx.textAlign='center';
+  ctx.fillText('|0⟩',cx,cy-R-16);
+  ctx.fillText('|1⟩',cx,cy+R+22);
+  ctx.fillText('+x',cx+R+18,cy+4);
+
+  // Bloch vector
+  const bx = cx + R * Math.sin(theta) * Math.cos(phi);
+  const by = cy - R * Math.cos(theta);
+
+  // shadow on equator
+  const sx = cx + R * Math.sin(theta) * Math.cos(phi);
+  const sy = cy;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(sx,sy);
+  ctx.strokeStyle='rgba(108,99,255,0.2)'; ctx.setLineDash([2,3]); ctx.lineWidth=1; ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(bx,by);
+  ctx.strokeStyle='rgba(108,99,255,0.25)'; ctx.setLineDash([2,3]); ctx.stroke(); ctx.setLineDash([]);
+
+  // arrow
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(bx,by);
+  const grd2 = ctx.createLinearGradient(cx,cy,bx,by);
+  grd2.addColorStop(0,'rgba(108,99,255,0.8)');
+  grd2.addColorStop(1,'rgba(0,212,170,1)');
+  ctx.strokeStyle=grd2; ctx.lineWidth=2.5; ctx.stroke();
+
+  // arrowhead
+  const angle = Math.atan2(by-cy, bx-cx);
+  ctx.beginPath();
+  ctx.moveTo(bx,by);
+  ctx.lineTo(bx-10*Math.cos(angle-0.4),by-10*Math.sin(angle-0.4));
+  ctx.lineTo(bx-10*Math.cos(angle+0.4),by-10*Math.sin(angle+0.4));
+  ctx.closePath(); ctx.fillStyle='rgba(0,212,170,1)'; ctx.fill();
+
+  // dot at tip
+  ctx.beginPath(); ctx.arc(bx,by,5,0,Math.PI*2);
+  ctx.fillStyle='#00D4AA'; ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // center dot
+  ctx.beginPath(); ctx.arc(cx,cy,3,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.fill();
+}
+
+// ══════════════ GATE SIMULATOR
+let gateState = {a:[1,0], b:[0,0]}; // [real, imag] for alpha and beta
+function prob0() { return gateState.a[0]**2+gateState.a[1]**2; }
+function prob1() { return gateState.b[0]**2+gateState.b[1]**2; }
+function complexMul(a,b) { return [a[0]*b[0]-a[1]*b[1], a[0]*b[1]+a[1]*b[0]]; }
+
+function applyGate(g) {
+  const out = document.getElementById('gate-output');
+  const a = gateState.a, b = gateState.b;
+  let applied = g;
+  switch(g) {
+    case 'reset': gateState = {a:[1,0],b:[0,0]}; break;
+    case 'H': {
+      const sq = 1/Math.sqrt(2);
+      gateState.a = [sq*(a[0]+b[0]), sq*(a[1]+b[1])];
+      gateState.b = [sq*(a[0]-b[0]), sq*(a[1]-b[1])];
+      break;
+    }
+    case 'X': { gateState.a=b.slice(); gateState.b=a.slice(); break; }
+    case 'Y': {
+      gateState.a=[b[1],-b[0]];
+      gateState.b=[-a[1],a[0]];
+      break;
+    }
+    case 'Z': { gateState.b=[-b[0],-b[1]]; break; }
+    case 'S': { gateState.b=complexMul(b,[0,1]); break; }
+    case 'T': { const sq2=Math.SQRT1_2; gateState.b=complexMul(b,[sq2,sq2]); break; }
+    case 'measure': {
+      const p0 = prob0();
+      const collapsed = Math.random() < p0 ? 0 : 1;
+      gateState = collapsed===0 ? {a:[1,0],b:[0,0]} : {a:[0,0],b:[1,0]};
+      applied = `measure → |${collapsed}⟩`;
+      break;
+    }
+  }
+  const p0 = prob0(), p1 = prob1();
+  const fmtC = (r,i) => `${r.toFixed(3)} ${i>=0?'+':'-'} ${Math.abs(i).toFixed(3)}i`;
+  out.textContent = `State: α|0⟩ + β|1⟩
+α = ${fmtC(gateState.a[0],gateState.a[1])}
+β = ${fmtC(gateState.b[0],gateState.b[1])}
+P(|0⟩) = ${(p0*100).toFixed(2)}%   P(|1⟩) = ${(p1*100).toFixed(2)}%
+Applied: ${applied}`;
+}
+
+// ══════════════ VQC CIRCUIT
+function drawVQC() {
+  const canvas = document.getElementById('circuit-canvas');
+  if(!canvas) return;
+  canvas.width = canvas.offsetWidth * devicePixelRatio;
+  canvas.height = 200 * devicePixelRatio;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const W = canvas.offsetWidth, H = 200;
+  ctx.fillStyle = '#0F1228'; ctx.fillRect(0,0,W,H);
+
+  const qubits = 3;
+  const qY = [H*0.28, H*0.5, H*0.72];
+  const colors = ['#6C63FF','#00D4AA','#FF6B6B'];
+
+  // Draw qubit lines
+  for(let q=0;q<qubits;q++){
+    ctx.beginPath(); ctx.moveTo(40,qY[q]); ctx.lineTo(W-40,qY[q]);
+    ctx.strokeStyle=`rgba(${q===0?'108,99,255':q===1?'0,212,170':'255,107,107'},0.3)`;
+    ctx.lineWidth=1.5; ctx.stroke();
+    // label
+    ctx.fillStyle=colors[q]; ctx.font='bold 12px Space Mono,monospace';
+    ctx.fillText('q'+q, 8, qY[q]+4);
+  }
+
+  // Gate helper
+  function drawGate(ctx, x, y, label, color, w=36, h=28) {
+    ctx.fillStyle = color+'22';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const r=4;
+    ctx.roundRect(x-w/2,y-h/2,w,h,r);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = color;
+    ctx.font = 'bold 11px Space Mono,monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x, y+4);
+  }
+
+  // Layer 1: Encoding
+  const lx = [90,160,240,320,400,480,560,640,W-70];
+  ctx.fillStyle='rgba(108,99,255,0.08)';
+  ctx.fillRect(60,10,110,H-20);
+  ctx.fillStyle='rgba(108,99,255,0.4)'; ctx.font='10px Space Grotesk,sans-serif';
+  ctx.fillText('Data Encoding',115,22);
+  drawGate(ctx,90,qY[0],'Rx','#6C63FF');
+  drawGate(ctx,90,qY[1],'Ry','#6C63FF');
+  drawGate(ctx,90,qY[2],'Rz','#6C63FF');
+
+  // Layer 2: Entangling
+  ctx.fillStyle='rgba(0,212,170,0.06)';
+  ctx.fillRect(180,10,140,H-20);
+  ctx.fillStyle='rgba(0,212,170,0.4)'; ctx.font='10px Space Grotesk,sans-serif';
+  ctx.fillText('Entanglement',250,22);
+  // CNOT
+  [0,1].forEach(q => {
+    const ctrl=qY[q], tgt=qY[q+1];
+    ctx.beginPath(); ctx.moveTo(230,ctrl); ctx.lineTo(230,tgt);
+    ctx.strokeStyle='rgba(0,212,170,0.5)'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.beginPath(); ctx.arc(230,ctrl,5,0,Math.PI*2);
+    ctx.fillStyle='#00D4AA'; ctx.fill();
+    ctx.beginPath(); ctx.arc(230,tgt,10,0,Math.PI*2);
+    ctx.strokeStyle='#00D4AA'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(230,tgt-10); ctx.lineTo(230,tgt+10);
+    ctx.moveTo(220,tgt); ctx.lineTo(240,tgt);
+    ctx.stroke();
+  });
+
+  // Layer 3: Variational
+  ctx.fillStyle='rgba(255,179,71,0.06)';
+  ctx.fillRect(340,10,200,H-20);
+  ctx.fillStyle='rgba(255,179,71,0.5)'; ctx.font='10px Space Grotesk,sans-serif';
+  ctx.fillText('Variational Ansatz (θ learnable)',420,22);
+  [370,450].forEach(x => {
+    drawGate(ctx,x,qY[0],'Ry(θ)','#FFB347',48);
+    drawGate(ctx,x,qY[1],'Rz(θ)','#FFB347',48);
+    drawGate(ctx,x,qY[2],'Rx(θ)','#FFB347',48);
+  });
+
+  // Measure
+  ctx.fillStyle='rgba(255,107,107,0.08)';
+  ctx.fillRect(W-90,10,60,H-20);
+  ctx.fillStyle='rgba(255,107,107,0.5)'; ctx.font='10px Space Grotesk,sans-serif';
+  ctx.fillText('Measure',W-60,22);
+  for(let q=0;q<qubits;q++){
+    ctx.beginPath();
+    ctx.arc(W-60, qY[q], 14, 0, Math.PI*2);
+    ctx.fillStyle='rgba(255,107,107,0.15)';
+    ctx.strokeStyle='#FF6B6B'; ctx.lineWidth=1.5;
+    ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(W-60,qY[q]+4,10,Math.PI,0);
+    ctx.strokeStyle='#FF6B6B'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(W-60,qY[q]+4); ctx.lineTo(W-54,qY[q]-6);
+    ctx.strokeStyle='#FF6B6B'; ctx.stroke();
+  }
+}
+
+// ══════════════ LATTICE
+function drawLattice() {
+  const canvas = document.getElementById('lattice-canvas');
+  if(!canvas) return;
+  canvas.width = canvas.offsetWidth * devicePixelRatio;
+  canvas.height = 280 * devicePixelRatio;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const W = canvas.offsetWidth, H = 280;
+  ctx.fillStyle='#0A0D1E'; ctx.fillRect(0,0,W,H);
+
+  const cx=W/2, cy=H/2;
+  const spacing=45;
+  // basis vectors (slightly skewed for interesting lattice)
+  const b1=[spacing,8], b2=[14,spacing];
+  const range=5;
+
+  for(let i=-range;i<=range;i++){
+    for(let j=-range;j<=range;j++){
+      const x=cx+i*b1[0]+j*b2[0];
+      const y=cy+i*b1[1]+j*b2[1];
+      if(x<-spacing||x>W+spacing||y<-spacing||y>H+spacing) continue;
+      ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2);
+      ctx.fillStyle='rgba(108,99,255,0.55)'; ctx.fill();
+
+      // grid lines
+      const nx=cx+(i+1)*b1[0]+j*b2[0], ny=cy+(i+1)*b1[1]+j*b2[1];
+      const mx=cx+i*b1[0]+(j+1)*b2[0], my=cy+i*b1[1]+(j+1)*b2[1];
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(nx,ny);
+      ctx.strokeStyle='rgba(108,99,255,0.1)'; ctx.lineWidth=0.8; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(mx,my);
+      ctx.strokeStyle='rgba(108,99,255,0.1)'; ctx.lineWidth=0.8; ctx.stroke();
+    }
+  }
+
+  // Secret point (target)
+  const tx=cx+2*b1[0]+1*b2[0], ty=cy+2*b1[1]+1*b2[1];
+  ctx.beginPath(); ctx.arc(tx,ty,6,0,Math.PI*2);
+  ctx.fillStyle='#FF6B6B'; ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.fillStyle='#FF6B6B'; ctx.font='bold 11px Space Mono,monospace'; ctx.textAlign='left';
+  ctx.fillText('secret s', tx+10, ty+4);
+
+  // Noisy observation
+  const noise=22;
+  const ox=tx+noise*0.8, oy=ty-noise*0.6;
+  ctx.beginPath(); ctx.arc(ox,oy,5,0,Math.PI*2);
+  ctx.fillStyle='#FFB347'; ctx.fill();
+  ctx.fillStyle='#FFB347'; ctx.font='bold 11px Space Mono,monospace';
+  ctx.fillText('b = As + e', ox+10, oy+4);
+
+  // Arrow from noisy to secret
+  ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(tx,ty);
+  ctx.strokeStyle='rgba(255,179,71,0.4)'; ctx.setLineDash([4,4]); ctx.lineWidth=1.5; ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Closest vector problem indicator
+  ctx.beginPath(); ctx.arc(cx,cy,7,0,Math.PI*2);
+  ctx.fillStyle='rgba(0,212,170,0.3)'; ctx.strokeStyle='#00D4AA'; ctx.lineWidth=1.5;
+  ctx.fill(); ctx.stroke();
+}
+
+// ══════════════ ACCORDION
+function toggleAcc(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
+}
+
+// ══════════════ QUIZ
+const quizData = [
+  { q:"What is the state of a qubit before measurement?", opts:["Definitely 0","Definitely 1","A superposition of 0 and 1","Either 0 or 1, but unknown"], ans:2, exp:"A qubit exists in a superposition — a linear combination α|0⟩ + β|1⟩. Only measurement collapses it to a definite 0 or 1." },
+  { q:"Which quantum algorithm poses the greatest threat to RSA encryption?", opts:["Grover's algorithm","Shor's algorithm","QAOA","HHL algorithm"], ans:1, exp:"Shor's algorithm can factor large integers in polynomial time, making RSA mathematically broken on a fault-tolerant quantum computer." },
+  { q:"What does the Hadamard (H) gate do to the |0⟩ state?", opts:["Flips it to |1⟩","Creates equal superposition: (|0⟩+|1⟩)/√2","Applies a phase of π","Nothing — it's an identity"], ans:1, exp:"H gate creates equal superposition: H|0⟩ = (|0⟩+|1⟩)/√2. This is the starting point of most quantum algorithms." },
+  { q:"Which NIST PQC standard (FIPS 203) is based on which hard problem?", opts:["Integer factorization","Discrete logarithm","Module Learning With Errors (LWE)","Shortest path in graphs"], ans:2, exp:"FIPS 203 (ML-KEM / Kyber) is based on the Module Learning With Errors problem — believed to resist quantum attacks." },
+  { q:"What is 'entanglement' in quantum computing?", opts:["Two qubits sharing classical bits","Quantum correlation where measuring one instantly affects the other","Two qubits in the same state","A gate that connects two circuit layers"], ans:1, exp:"Entanglement is a quantum correlation — measuring one entangled qubit instantly determines properties of its partner, regardless of distance." },
+  { q:"What is a Variational Quantum Circuit (VQC)?", opts:["A classical neural network simulating quantum effects","A fixed quantum circuit for Shor's algorithm","A parameterized quantum circuit trained like a neural network","A quantum circuit for error correction"], ans:2, exp:"A VQC is a parameterized quantum circuit with trainable rotation angles, trained via quantum-classical hybrid optimization — essentially a quantum neural network." },
+  { q:"CRYSTALS-Dilithium (FIPS 204) is used for what purpose?", opts:["Key encapsulation","Digital signatures","Symmetric encryption","Random number generation"], ans:1, exp:"FIPS 204 (ML-DSA / Dilithium) is a digital signature standard — used for code signing, document signing, and authentication in post-quantum systems." },
+  { q:"What is the 'harvest now, decrypt later' threat?", opts:["Quantum computers cracking passwords in real time","Adversaries collecting encrypted data now to decrypt once quantum computers mature","Quantum computers interfering with satellite signals","A side-channel attack on quantum hardware"], ans:1, exp:"Adversaries are collecting encrypted internet traffic today, planning to decrypt it when sufficiently powerful quantum computers become available — making data sensitive for decades." },
+  { q:"Which framework is best suited specifically for Quantum Machine Learning?", opts:["IBM Qiskit","Google Cirq","Xanadu PennyLane","Microsoft Q#"], ans:2, exp:"PennyLane by Xanadu is designed specifically for QML — it supports automatic differentiation through quantum circuits and integrates with PyTorch, TensorFlow, and JAX." },
+  { q:"In the Bloch sphere representation, where is the equal superposition state (|0⟩+|1⟩)/√2?", opts:["North pole","South pole","On the equator","+y axis"], ans:2, exp:"The equator of the Bloch sphere represents all equal superposition states. The north pole is |0⟩, south pole is |1⟩, and equatorial points have 50/50 measurement probabilities." }
+];
+
+let quizAnswers = {};
+function renderQuiz() {
+  const container = document.getElementById('quiz-container');
+  if(container.innerHTML) return;
+  quizAnswers = {};
+  container.innerHTML = quizData.map((q,i) => `
+    <div class="quiz-card" id="qcard-${i}">
+      <div class="quiz-q">Q${i+1}. ${q.q}</div>
+      <div class="quiz-opts">
+        ${q.opts.map((o,j) => `<button class="quiz-opt" onclick="answerQ(${i},${j})" id="qopt-${i}-${j}">
+          <span style="font-family:'Space Mono',monospace;font-size:0.72rem;opacity:0.5;">${['A','B','C','D'][j]}</span>
+          ${o}
+        </button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="qfb-${i}">${q.exp}</div>
+    </div>
+  `).join('') + `<div style="text-align:center;margin:2rem 0;"><button class="start-btn" onclick="showScore()">See Results →</button></div>`;
+}
+
+function answerQ(qi, opt) {
+  if(quizAnswers[qi] !== undefined) return;
+  quizAnswers[qi] = opt;
+  const q = quizData[qi];
+  document.querySelectorAll(`[id^="qopt-${qi}-"]`).forEach((btn,j) => {
+    btn.disabled = true;
+    if(j===q.ans) btn.classList.add('correct');
+    else if(j===opt && opt!==q.ans) btn.classList.add('wrong');
+  });
+  document.getElementById(`qfb-${qi}`).classList.add('show');
+}
+
+function showScore() {
+  const total = quizData.length;
+  const correct = quizData.filter((q,i) => quizAnswers[i]===q.ans).length;
+  const pct = Math.round((correct/total)*100);
+  const scoreDiv = document.getElementById('quiz-score');
+  scoreDiv.style.display='block';
+  scoreDiv.innerHTML = `
+    <div class="quiz-card" style="text-align:center;">
+      <div class="score-display">${correct} / ${total}</div>
+      <p style="font-size:1.1rem;color:var(--muted);font-family:'Crimson Pro',serif;font-style:italic;margin-bottom:1rem;">
+        ${pct>=80?'Outstanding! Quantum advantage achieved. 🌟':pct>=60?'Strong foundation — keep exploring. ⚛️':'Great start — the quantum journey continues. 🚀'}
+      </p>
+      <p style="font-size:0.83rem;color:var(--muted);margin-bottom:1.5rem;">Score: ${pct}% · ${total-correct} to review</p>
+      <button class="start-btn" onclick="goto(0)" style="margin-right:1rem;">← Back to Start</button>
+      <button class="start-btn" style="background:var(--surface);box-shadow:none;border:1px solid var(--border);" onclick="restartQuiz()">Retry Quiz</button>
+    </div>
+  `;
+  scoreDiv.scrollIntoView({behavior:'smooth'});
+}
+
+function restartQuiz() {
+  document.getElementById('quiz-container').innerHTML = '';
+  document.getElementById('quiz-score').style.display='none';
+  renderQuiz();
+}
+
+// ══════════════ INIT
+setTimeout(drawBloch, 300);
+setTimeout(drawCircuit, 300);
+function drawCircuit(){ drawVQC(); }
+
+// ══════════════════════════════════
+// COIN — SUPERPOSITION
+// ══════════════════════════════════
+let cTosses=0, qTosses=0, qHeads=0, qTails=0;
+let classicSide='heads'; // current shown face
+let qSuperposed=true;
+
+function tossClassic() {
+  const result = Math.random() < 0.5 ? 'heads' : 'tails';
+  classicSide = result;
+  cTosses++;
+
+  const coin = document.getElementById('classic-coin');
+  const isH = result === 'heads';
+
+  // Flash effect
+  coin.style.filter = 'brightness(1.4)';
+  setTimeout(() => { coin.style.filter = ''; }, 180);
+
+  // Show the correct face via class
+  coin.classList.remove('show-heads','show-tails');
+  void coin.offsetWidth;
+  coin.classList.add(isH ? 'show-heads' : 'show-tails');
+
+  // Update face visibility directly
+  const headsEl = coin.querySelector('.coin-face.heads');
+  const tailsEl = coin.querySelector('.coin-face.tails');
+  headsEl.style.opacity = isH ? '1' : '0';
+  tailsEl.style.opacity = isH ? '0' : '1';
+
+  document.getElementById('classic-txt').textContent = isH ? 'HEADS (0)' : 'TAILS (1)';
+  document.getElementById('classic-fill').style.width = isH ? '100%' : '0%';
+  document.getElementById('classic-fill').style.background = isH ? 'var(--accent4)' : 'var(--accent3)';
+  const p0=isH?100:0, p1=isH?0:100;
+  document.getElementById('cp0').textContent = p0+'%';
+  document.getElementById('cp1').textContent = p1+'%';
+  document.getElementById('cpb0').style.height = Math.max(2,p0*0.54)+'px';
+  document.getElementById('cpb1').style.height = Math.max(2,p1*0.54)+'px';
+  document.getElementById('c-tosses').textContent = cTosses;
+  updateCoinExplainer('classic', result);
+}
+
+function tossQuantum() {
+  if(!qSuperposed) { resetQuantum(); return; }
+
+  const coin = document.getElementById('quantum-coin');
+  const result = Math.random() < 0.5 ? 0 : 1;
+  qTosses++;
+  if(result===0) qHeads++; else qTails++;
+
+  // Stop flicker, apply collapsed class
+  coin.classList.remove('superposed');
+  coin.classList.remove('collapsed-0','collapsed-1');
+  coin.style.animation = 'none';
+  coin.style.filter = result===0
+    ? 'drop-shadow(0 0 22px rgba(108,99,255,1)) drop-shadow(0 0 8px rgba(108,99,255,0.6))'
+    : 'drop-shadow(0 0 22px rgba(0,212,170,1)) drop-shadow(0 0 8px rgba(0,212,170,0.6))';
+
+  // Short flash animation before locking
+  void coin.offsetWidth;
+  coin.classList.add('collapsed-' + result);
+
+  qSuperposed = false;
+  document.getElementById('quantum-txt').textContent = result===0 ? '|0⟩ — COLLAPSED' : '|1⟩ — COLLAPSED';
+  document.getElementById('quantum-txt').style.color = result===0 ? 'var(--accent)' : 'var(--accent2)';
+
+  const p0=result===0?100:0, p1=result===0?0:100;
+  document.getElementById('qp0').textContent = p0+'%';
+  document.getElementById('qp1').textContent = p1+'%';
+  document.getElementById('qpb0').style.height = Math.max(2,p0*0.54)+'px';
+  document.getElementById('qpb1').style.height = Math.max(2,p1*0.54)+'px';
+  document.getElementById('quantum-fill').style.width = p0+'%';
+  document.getElementById('quantum-fill').style.background = result===0?'var(--accent)':'var(--accent2)';
+  document.getElementById('q-tosses').textContent = qTosses;
+  document.getElementById('q-heads').textContent = qHeads;
+  document.getElementById('q-tails').textContent = qTails;
+  updateCoinExplainer('quantum-collapse', result);
+}
+
+function resetQuantum() {
+  qSuperposed = true;
+  const coin = document.getElementById('quantum-coin');
+
+  coin.classList.remove('collapsed-0','collapsed-1');
+  coin.style.animation = '';
+  coin.style.filter = '';
+  void coin.offsetWidth;
+  coin.classList.add('superposed');
+
+  document.getElementById('quantum-txt').textContent = 'SUPERPOSED ✦';
+  document.getElementById('quantum-txt').style.color = '';
+  document.getElementById('qp0').textContent = '50%';
+  document.getElementById('qp1').textContent = '50%';
+  document.getElementById('qpb0').style.height = '27px';
+  document.getElementById('qpb1').style.height = '27px';
+  document.getElementById('quantum-fill').style.width = '50%';
+  document.getElementById('quantum-fill').style.background = 'linear-gradient(90deg,var(--accent),var(--accent2))';
+  updateCoinExplainer('reset', null);
+}
+
+function updateCoinExplainer(type, val) {
+  const el = document.getElementById('coin-explainer');
+  const msgs = {
+    'classic': `<strong style="color:var(--accent4)">Classical result: ${val==='heads'?'Heads (0)':'Tails (1)'}</strong><br>The classical coin had a definite state <em>before</em> you tossed it — it was always going to land this way (deterministic physics). There is no mystery. A classical bit is always 0 or 1.`,
+    'quantum-collapse': `<strong style="color:var(--accent${val===0?'':2})">Measurement result: |${val}⟩</strong> — Superposition collapsed!<br>The qubit was genuinely in <em>both states simultaneously</em> before you clicked. The measurement forced it to pick one. This is not randomness from ignorance — it is fundamental quantum indeterminism. <strong>The act of observation changes the state.</strong>`,
+    'reset': `<strong style="color:var(--accent)">Superposition restored — flickering again ✦</strong><br>The qubit is back in both |0⟩ and |1⟩ at once. Watch it flicker between faces: that is the visual metaphor for being in <em>both states simultaneously</em>. Click the coin again whenever you want to observe (collapse) it.`,
+  };
+  el.innerHTML = msgs[type] || el.innerHTML;
+}
+
+// ══════════════════════════════════
+// DICE — ENTANGLEMENT
+// ══════════════════════════════════
+let entangled = true;
+let dTotal=0, dMatch=0, dRand=0;
+let lastA=null, lastB=null;
+const diceEmoji = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+const diceNums  = [1,2,3,4,5,6];
+let rollingA=false, rollingB=false;
+
+function toggleEntangle() {
+  entangled = !entangled;
+  const badge = document.getElementById('entangle-toggle');
+  const dot = document.getElementById('e-dot');
+  const lbl = document.getElementById('e-label');
+  const wire1 = document.getElementById('e-wire-left');
+  const wire2 = document.getElementById('e-wire-right');
+  const icon = document.getElementById('e-icon');
+  if(entangled){
+    badge.classList.remove('off'); dot.classList.remove('off');
+    lbl.textContent='ENTANGLEMENT: ON';
+    wire1.style.opacity='1'; wire2.style.opacity='1'; icon.textContent='🔗';
+    document.getElementById('dice-hint').textContent='Click either die — watch the other respond instantly ✦';
+  } else {
+    badge.classList.add('off');
+    lbl.textContent='ENTANGLEMENT: OFF';
+    wire1.style.opacity='0.15'; wire2.style.opacity='0.15'; icon.textContent='🔓';
+    document.getElementById('dice-hint').textContent='Entanglement OFF — dice roll independently now.';
+  }
+}
+
+function rollDice(who) {
+  if(rollingA || rollingB) return;
+  rollingA = rollingB = true;
+
+  const valA = Math.floor(Math.random()*6);
+  const valB = entangled ? valA : Math.floor(Math.random()*6);
+
+  // animate A
+  const dA = document.getElementById('diceA'), dAi = document.getElementById('diceA-inner');
+  dA.classList.remove('rolling'); void dA.offsetWidth;
+  dAi.style.setProperty('--rx', (360+Math.random()*360)+'deg');
+  dAi.style.setProperty('--ry', (360+Math.random()*360)+'deg');
+  dAi.style.setProperty('--rx2', (720+Math.random()*360)+'deg');
+  dAi.style.setProperty('--ry2', (720+Math.random()*360)+'deg');
+  dA.classList.add('rolling');
+
+  // animate B (entangled = slight delay for drama)
+  const delay = entangled ? 200 : 0;
+  setTimeout(() => {
+    const dB = document.getElementById('diceB'), dBi = document.getElementById('diceB-inner');
+    dB.classList.remove('rolling'); void dB.offsetWidth;
+    dBi.style.setProperty('--rx', (360+Math.random()*360)+'deg');
+    dBi.style.setProperty('--ry', (360+Math.random()*360)+'deg');
+    dBi.style.setProperty('--rx2', (720+Math.random()*360)+'deg');
+    dBi.style.setProperty('--ry2', (720+Math.random()*360)+'deg');
+    dB.classList.add('rolling');
+  }, delay);
+
+  setTimeout(() => {
+    dA.classList.remove('rolling');
+    document.getElementById('diceA-val').textContent = diceNums[valA];
+    updateDiceFaces('A', valA);
+    lastA = valA;
+    setTimeout(() => {
+      const dB2 = document.getElementById('diceB');
+      dB2.classList.remove('rolling');
+      document.getElementById('diceB-val').textContent = diceNums[valB];
+      updateDiceFaces('B', valB);
+      lastB = valB;
+      rollingA = rollingB = false;
+      dTotal++;
+      const matched = valA===valB;
+      if(entangled && matched) dMatch++;
+      if(!entangled && matched) dRand++;
+      document.getElementById('d-total').textContent = dTotal;
+      document.getElementById('d-match').textContent = dMatch;
+      document.getElementById('d-rand').textContent = dRand;
+      updateDiceReveal(valA, valB, matched);
+    }, delay+50);
+  }, 650);
+}
+
+function updateDiceFaces(which, val) {
+  const id = 'dice'+which+'-inner';
+  const inner = document.getElementById(id);
+  // Update the front face with the result emoji
+  inner.querySelector('.d-front').textContent = diceEmoji[val];
+}
+
+function updateDiceReveal(a, b, matched) {
+  const el = document.getElementById('dice-reveal');
+  if(entangled) {
+    el.style.borderColor = matched ? 'var(--accent2)' : 'var(--accent3)';
+    el.innerHTML = matched
+      ? `<strong style="color:var(--accent2)">✦ Entanglement confirmed!</strong> Alice rolled <strong>${diceNums[a]}</strong> — Bob's die instantly showed <strong>${diceNums[b]}</strong>. The dice were in a shared quantum state. Neither had a definite value until Alice's measurement collapsed <em>both</em>. This is the Bell state: (|${a}${a}⟩) — spooky action across any distance.`
+      : `<strong style="color:var(--accent)">Still entangled</strong> — both dice show <strong>${diceNums[a]}</strong>. No matter how many times you roll, with entanglement ON they will always match — not because they secretly agreed, but because they share one quantum state.`;
+  } else {
+    const desc = a===b
+      ? `<strong style="color:var(--accent4)">Coincidence!</strong> Both showed ${diceNums[a]} — but this is classical luck (~16.7% chance), not entanglement. Without quantum correlation, dice just happen to match sometimes.`
+      : `<strong style="color:var(--muted)">No correlation.</strong> Alice got ${diceNums[a]}, Bob got ${diceNums[b]}. Without entanglement, they're just two independent random dice. Compare: with entanglement ON, they would always match.`;
+    el.style.borderColor = 'var(--border)';
+    el.innerHTML = desc;
+  }
+}
+
+// ══════════════════════════════════
+// WAVE — INTERFERENCE
+// ══════════════════════════════════
+let waveAnim=null, waveOffset=0;
+let iType = 'constructive';
+
+function setIType(type, btn) {
+  iType = type;
+  document.querySelectorAll('.itype-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('wave-controls-free').style.display = type==='free'?'flex':'none';
+  drawWaves();
+}
+
+function drawWaves() {
+  const canvas = document.getElementById('wave-canvas');
+  if(!canvas) return;
+  canvas.width = canvas.offsetWidth * devicePixelRatio;
+  canvas.height = 200 * devicePixelRatio;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const W = canvas.offsetWidth, H = 200;
+
+  ctx.fillStyle='#080A18'; ctx.fillRect(0,0,W,H);
+
+  // Grid lines
+  ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke(); }
+  for(let y=0;y<H;y+=40){ ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke(); }
+
+  // Center line
+  ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke(); ctx.setLineDash([]);
+
+  let ampA, ampB, freqA, phaseB;
+  if(iType==='constructive'){ ampA=50; ampB=50; freqA=2; phaseB=0; }
+  else if(iType==='destructive'){ ampA=50; ampB=50; freqA=2; phaseB=Math.PI; }
+  else if(iType==='partial'){ ampA=50; ampB=30; freqA=2; phaseB=Math.PI*0.6; }
+  else {
+    ampA = parseFloat(document.getElementById('wA-amp')?.value||40);
+    ampB = parseFloat(document.getElementById('wB-amp')?.value||40);
+    freqA = parseFloat(document.getElementById('wA-freq')?.value||2);
+    phaseB = (parseFloat(document.getElementById('wB-phase')?.value||0)) * Math.PI/180;
+  }
+
+  const drawWave = (amp, freq, phase, color, lw, alpha) => {
+    ctx.beginPath();
+    ctx.strokeStyle=color; ctx.lineWidth=lw; ctx.globalAlpha=alpha;
+    for(let x=0;x<=W;x++){
+      const t = (x/W)*Math.PI*2*freq + waveOffset;
+      const y = H/2 - amp*Math.sin(t+phase);
+      x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.stroke(); ctx.globalAlpha=1;
+  };
+
+  // Wave A
+  drawWave(ampA, freqA, 0, '#6C63FF', 2, 0.75);
+  // Wave B
+  drawWave(ampB, freqA, phaseB, '#FF6B6B', 2, 0.75);
+  // Result (superposition)
+  ctx.beginPath(); ctx.strokeStyle='#00D4AA'; ctx.lineWidth=3; ctx.globalAlpha=1;
+  for(let x=0;x<=W;x++){
+    const t = (x/W)*Math.PI*2*freqA + waveOffset;
+    const yA = ampA*Math.sin(t);
+    const yB = ampB*Math.sin(t+phaseB);
+    const y = H/2 - (yA+yB);
+    x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // Amplitude shading under result
+  ctx.beginPath();
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(0,212,170,0.12)');
+  grad.addColorStop(0.5,'rgba(0,212,170,0)');
+  grad.addColorStop(1,'rgba(0,212,170,0.12)');
+  ctx.fillStyle=grad;
+  ctx.moveTo(0,H/2);
+  for(let x=0;x<=W;x++){
+    const t=(x/W)*Math.PI*2*freqA+waveOffset;
+    const y=H/2-(ampA*Math.sin(t)+ampB*Math.sin(t+phaseB));
+    ctx.lineTo(x,y);
+  }
+  ctx.lineTo(W,H/2); ctx.closePath(); ctx.fill();
+
+  // Labels
+  ctx.globalAlpha=1;
+  ctx.fillStyle='var(--muted)'; ctx.font='bold 10px Space Mono,monospace'; ctx.textAlign='right';
+  const labels = {
+    constructive:'CONSTRUCTIVE — waves add up, result is amplified (correct answer boosted)',
+    destructive:'DESTRUCTIVE — waves cancel, result is zero (wrong answer eliminated)',
+    partial:'PARTIAL — result is reduced but non-zero',
+    free:'FREE MODE — experiment with amplitude and phase'
+  };
+  ctx.fillStyle='rgba(0,212,170,0.7)'; ctx.textAlign='left';
+  ctx.fillText(labels[iType], 10, H-10);
+}
+
+// Animate waves
+function animateWaves() {
+  waveOffset += 0.025;
+  drawWaves();
+  if(current===1) requestAnimationFrame(animateWaves);
+}
+
+// Override goto to handle wave animation
+const _gotoOrig = goto;
+goto = function(i) {
+  _gotoOrig(i);
+  if(i===1){ drawWaves(); requestAnimationFrame(animateWaves); }
+};
+</script>
+</body>
+</html>
