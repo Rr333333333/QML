@@ -457,7 +457,28 @@
     padding: 1.5rem;
     margin-bottom: 2rem;
   }
-  #lattice-canvas { width: 100%; border-radius: 4px; }
+  .lattice-embed-wrapper {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow:
+      0 25px 50px -15px rgba(0,0,0,0.55),
+      0 0 0 1px rgba(255,255,255,0.04) inset,
+      0 0 70px rgba(108,99,255,0.18);
+  }
+  .lattice-embed-wrapper iframe { width: 100%; height: 420px; border: 0; display: block; background: var(--deep); }
+  .lattice-embed-wrapper p {
+    font-size: 0.75rem !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+    padding: 0.6rem 0.9rem;
+    color: var(--muted) !important;
+    background: var(--deep);
+    border-top: 1px solid var(--border);
+  }
+  .lattice-embed-wrapper p a { font-weight: 600 !important; color: var(--accent2) !important; text-decoration: none; }
+  .lattice-embed-wrapper p a:hover { text-decoration: underline; }
 
   /* ── PLATFORM CARDS ── */
   .platform-grid {
@@ -587,6 +608,15 @@
 
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
   @media(max-width:700px){ .two-col { grid-template-columns: 1fr; } }
+
+  /* ── QML BASICS PRIMER ── */
+  .qml-venn-wrap { display:flex; justify-content:center; align-items:center; }
+  .qml-venn { width:100%; max-width:380px; display:block; }
+  .qml-venn text { font-family:'Space Grotesk', sans-serif; fill: var(--text); }
+  .qml-venn .qml-caption { fill: var(--muted); font-style: italic; }
+  .qml-venn .qml-center-label { font-weight: 700; }
+  .concept-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0 1.5rem; }
+  @media(max-width:700px){ .concept-grid { grid-template-columns: 1fr; } }
 
   /* scrollbar */
   ::-webkit-scrollbar { width: 6px; }
@@ -1363,6 +1393,84 @@
     <strong>NISQ Era:</strong> We are in the Noisy Intermediate-Scale Quantum era — 50–1000 qubit machines with significant error rates. Fault-tolerant QC is still ~10 years away, but QML algorithms are being designed for NISQ hardware today.
   </div>
 
+  <!-- QML BASICS PRIMER -->
+  <div class="viz-block">
+    <h3>🔮 What is Quantum Machine Learning?</h3>
+    <p>Before we go deeper in the next module, here's the short version — where QML actually sits at the intersection of these fields.</p>
+
+    <div class="two-col" style="align-items:center;">
+      <div class="qml-venn-wrap">
+        <svg class="qml-venn" viewBox="0 0 500 460" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="190" cy="180" r="140" fill="#FF6B6B" fill-opacity="0.4" style="mix-blend-mode:screen;"/>
+          <circle cx="310" cy="180" r="140" fill="#00D4AA" fill-opacity="0.4" style="mix-blend-mode:screen;"/>
+          <circle cx="250" cy="300" r="140" fill="#6C63FF" fill-opacity="0.4" style="mix-blend-mode:screen;"/>
+          <circle cx="190" cy="180" r="140" fill="none" stroke="#FF6B6B" stroke-opacity="0.5" stroke-width="1.5"/>
+          <circle cx="310" cy="180" r="140" fill="none" stroke="#00D4AA" stroke-opacity="0.5" stroke-width="1.5"/>
+          <circle cx="250" cy="300" r="140" fill="none" stroke="#6C63FF" stroke-opacity="0.5" stroke-width="1.5"/>
+
+          <text x="118" y="120" font-size="15" font-weight="600" text-anchor="middle">Machine</text>
+          <text x="118" y="140" font-size="15" font-weight="600" text-anchor="middle">Learning</text>
+
+          <text x="382" y="120" font-size="15" font-weight="600" text-anchor="middle">Quantum</text>
+          <text x="382" y="140" font-size="15" font-weight="600" text-anchor="middle">Computing</text>
+
+          <text x="250" y="400" font-size="15" font-weight="600" text-anchor="middle">Optimization</text>
+          <text x="250" y="420" font-size="15" font-weight="600" text-anchor="middle">Techniques</text>
+
+          <text x="250" y="142" font-size="12" text-anchor="middle" opacity="0.9">Big Data</text>
+          <text x="250" y="158" font-size="12" text-anchor="middle" opacity="0.9">Processing</text>
+
+          <text x="150" y="248" font-size="11.5" text-anchor="middle" opacity="0.9">Intelligent</text>
+          <text x="150" y="263" font-size="11.5" text-anchor="middle" opacity="0.9">Algorithms</text>
+
+          <text x="352" y="248" font-size="11" text-anchor="middle" opacity="0.9">Quantum Info</text>
+          <text x="352" y="263" font-size="11" text-anchor="middle" opacity="0.9">Processing</text>
+
+          <text x="250" y="208" font-size="12.5" text-anchor="middle" class="qml-center-label">Quantum</text>
+          <text x="250" y="223" font-size="12.5" text-anchor="middle" class="qml-center-label">Machine</text>
+          <text x="250" y="238" font-size="12.5" text-anchor="middle" class="qml-center-label">Learning</text>
+
+          <text x="250" y="450" font-size="14" text-anchor="middle" class="qml-caption">Quantum Machine Learning</text>
+        </svg>
+      </div>
+      <div>
+        <p style="font-size:0.9rem; color:var(--text); line-height:1.7;">Quantum Machine Learning (QML) is an interdisciplinary field that merges quantum computing with traditional AI. By using qubits, superposition, and entanglement, QML algorithms aim to process massive datasets, accelerate training times, and solve computationally difficult tasks exponentially faster than classical machine learning.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 1rem;">Core Concepts</h3>
+    <div class="concept-grid">
+      <div class="platform-card">
+        <div class="platform-logo">Quantum-enhanced ML</div>
+        <div class="platform-type">Quantum algorithms for classical data</div>
+        <p>Uses quantum processors (QPUs) to execute specific tasks — like linear algebra, matrix inversion, or optimization problems — speeding up the classical machine learning pipeline.</p>
+      </div>
+      <div class="platform-card">
+        <div class="platform-logo">ML for Quantum</div>
+        <div class="platform-type">Machine learning for quantum systems</div>
+        <p>Utilizes classical AI techniques to help researchers understand quantum phenomena, calibrate quantum hardware, and discover new quantum error-correcting codes.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 1rem;">FAQ</h3>
+    <div class="accordion">
+      <button class="accordion-head" onclick="toggleAcc(this)">What is the concept of quantum AI? <span class="chevron">▼</span></button>
+      <div class="accordion-body">Fundamentally, quantum AI builds upon the ideas of quantum computing and artificial intelligence to provide a system that is more robust and effective. Information is processed by conventional computers using bits, which can be either a 0 or a 1 — quantum AI instead leans on qubits and quantum effects to process information.</div>
+    </div>
+    <div class="accordion">
+      <button class="accordion-head" onclick="toggleAcc(this)">What is the objective of quantum machine learning? <span class="chevron">▼</span></button>
+      <div class="accordion-body">QML is a technique of combining machine learning and quantum computing concepts, in which qubits are used instead of bits and the model is trained. QML can aid in the speeding up of existing algorithms, the development of new algorithms, and the solution of more complex problems.</div>
+    </div>
+    <div class="accordion">
+      <button class="accordion-head" onclick="toggleAcc(this)">What are the advantages of quantum ML? <span class="chevron">▼</span></button>
+      <div class="accordion-body">Quantum machine learning employs the power of quantum computers to provide faster, more accurate computations as well as increased scalability. Because of the unique quantum properties, multiple solutions can be explored at the same time, resulting in more efficient problem-solving. Furthermore, quantum algorithms may reveal insights in data analysis that classical methods cannot.</div>
+    </div>
+    <div class="accordion">
+      <button class="accordion-head" onclick="toggleAcc(this)">What types of problems can QML address? <span class="chevron">▼</span></button>
+      <div class="accordion-body">QML offers immense potential in solving data processing, pattern recognition, and optimization problems. In situations where classical methods have computational difficulties, quantum algorithms might perform better.</div>
+    </div>
+  </div>
+
   <button class="start-btn" onclick="goto(2)" style="margin-top:1rem;">Next: Quantum ML →</button>
 </div>
 </section>
@@ -1516,9 +1624,12 @@
   <!-- LATTICE VISUAL -->
   <div class="lattice-demo">
     <h3 style="font-size:1rem;font-weight:600;margin-bottom:0.5rem;">🔷 Lattice Cryptography — Visualized</h3>
-    <p style="font-size:0.83rem;color:var(--muted);margin-bottom:1rem;">A lattice is a regular grid of points in high-dimensional space. The hard problem: given a "noisy" target point, find the <em>closest lattice point</em> — this is the Learning With Errors (LWE) problem, believed to resist quantum attack.</p>
-    <canvas id="lattice-canvas" height="280"></canvas>
-    <p style="font-size:0.78rem;color:var(--muted);margin-top:0.75rem;">Blue dots = lattice points · Red = secret target · Orange = noisy observation · Dashed = shortest vector (hard to find in 1000+ dimensions)</p>
+    <p style="font-size:0.83rem;color:var(--muted);margin-bottom:1rem;">A lattice is a regular grid of points in high-dimensional space. The hard problem: given a "noisy" target point, find the <em>closest lattice point</em> — this is the Learning With Errors (LWE) problem, believed to resist quantum attack. Drag to rotate and scroll to zoom on an actual 3D lattice grid below.</p>
+    <div class="sketchfab-embed-wrapper lattice-embed-wrapper">
+      <iframe title="3d lattice" frameborder="0" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share src="https://sketchfab.com/models/4b35e94fd3a240aaa01f8cc795d956d5/embed"> </iframe>
+      <p> <a href="https://sketchfab.com/3d-models/3d-lattice-4b35e94fd3a240aaa01f8cc795d956d5?utm_medium=embed&utm_campaign=share-popup&utm_content=4b35e94fd3a240aaa01f8cc795d956d5" target="_blank" rel="nofollow"> 3d lattice </a> by <a href="https://sketchfab.com/dansmath?utm_medium=embed&utm_campaign=share-popup&utm_content=4b35e94fd3a240aaa01f8cc795d956d5" target="_blank" rel="nofollow"> dansmath </a> on <a href="https://sketchfab.com?utm_medium=embed&utm_campaign=share-popup&utm_content=4b35e94fd3a240aaa01f8cc795d956d5" target="_blank" rel="nofollow">Sketchfab</a></p>
+    </div>
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:0.75rem;">Each ball marks an integer lattice point in 3D coordinate space — in real LWE-based schemes like Kyber, this grid lives in 500+ dimensions, which is exactly what makes the closest-point problem intractable even for a quantum computer.</p>
   </div>
 
   <!-- HARD PROBLEMS -->
@@ -1744,7 +1855,7 @@ function goto(i) {
   window.scrollTo(0,0);
   if(i===1){ setTimeout(drawBloch,100); setTimeout(drawCircuit,200); }
   if(i===2){ setTimeout(drawVQC,100); }
-  if(i===3){ setTimeout(drawLattice,100); }
+
   if(i===5){ renderQuiz(); }
 }
 
@@ -1958,69 +2069,7 @@ function drawVQC() {
   }
 }
 
-// ══════════════ LATTICE
-function drawLattice() {
-  const canvas = document.getElementById('lattice-canvas');
-  if(!canvas) return;
-  canvas.width = canvas.offsetWidth * devicePixelRatio;
-  canvas.height = 280 * devicePixelRatio;
-  const ctx = canvas.getContext('2d');
-  ctx.scale(devicePixelRatio, devicePixelRatio);
-  const W = canvas.offsetWidth, H = 280;
-  ctx.fillStyle='#0A0D1E'; ctx.fillRect(0,0,W,H);
 
-  const cx=W/2, cy=H/2;
-  const spacing=45;
-  // basis vectors (slightly skewed for interesting lattice)
-  const b1=[spacing,8], b2=[14,spacing];
-  const range=5;
-
-  for(let i=-range;i<=range;i++){
-    for(let j=-range;j<=range;j++){
-      const x=cx+i*b1[0]+j*b2[0];
-      const y=cy+i*b1[1]+j*b2[1];
-      if(x<-spacing||x>W+spacing||y<-spacing||y>H+spacing) continue;
-      ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2);
-      ctx.fillStyle='rgba(108,99,255,0.55)'; ctx.fill();
-
-      // grid lines
-      const nx=cx+(i+1)*b1[0]+j*b2[0], ny=cy+(i+1)*b1[1]+j*b2[1];
-      const mx=cx+i*b1[0]+(j+1)*b2[0], my=cy+i*b1[1]+(j+1)*b2[1];
-      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(nx,ny);
-      ctx.strokeStyle='rgba(108,99,255,0.1)'; ctx.lineWidth=0.8; ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(mx,my);
-      ctx.strokeStyle='rgba(108,99,255,0.1)'; ctx.lineWidth=0.8; ctx.stroke();
-    }
-  }
-
-  // Secret point (target)
-  const tx=cx+2*b1[0]+1*b2[0], ty=cy+2*b1[1]+1*b2[1];
-  ctx.beginPath(); ctx.arc(tx,ty,6,0,Math.PI*2);
-  ctx.fillStyle='#FF6B6B'; ctx.fill();
-  ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
-  ctx.fillStyle='#FF6B6B'; ctx.font='bold 11px Space Mono,monospace'; ctx.textAlign='left';
-  ctx.fillText('secret s', tx+10, ty+4);
-
-  // Noisy observation
-  const noise=22;
-  const ox=tx+noise*0.8, oy=ty-noise*0.6;
-  ctx.beginPath(); ctx.arc(ox,oy,5,0,Math.PI*2);
-  ctx.fillStyle='#FFB347'; ctx.fill();
-  ctx.fillStyle='#FFB347'; ctx.font='bold 11px Space Mono,monospace';
-  ctx.fillText('b = As + e', ox+10, oy+4);
-
-  // Arrow from noisy to secret
-  ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(tx,ty);
-  ctx.strokeStyle='rgba(255,179,71,0.4)'; ctx.setLineDash([4,4]); ctx.lineWidth=1.5; ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Closest vector problem indicator
-  ctx.beginPath(); ctx.arc(cx,cy,7,0,Math.PI*2);
-  ctx.fillStyle='rgba(0,212,170,0.3)'; ctx.strokeStyle='#00D4AA'; ctx.lineWidth=1.5;
-  ctx.fill(); ctx.stroke();
-}
-
-// ══════════════ ACCORDION
 function toggleAcc(btn) {
   btn.classList.toggle('open');
   btn.nextElementSibling.classList.toggle('open');
