@@ -676,6 +676,7 @@
     <li><button onclick="goto(3)">Cryptography</button></li>
     <li><button onclick="goto(4)">Platforms</button></li>
     <li><button onclick="goto(5)">Quiz</button></li>
+    <li><button onclick="goto(6)">Research</button></li>
   </ul>
   <div class="timer-badge" id="timer-badge" onclick="toggleTimer()">⏱ Start Timer</div>
 </nav>
@@ -692,7 +693,7 @@
     <p class="hero-sub">Where superposition meets gradient descent — a practical, visual introduction to the next frontier of AI.</p>
 
     <div class="session-meta">
-      <div class="meta-chip chip-time">⏱ 60 min · 5 modules</div>
+      <div class="meta-chip chip-time">⏱ 60 min · 6 modules</div>
       <div class="meta-chip chip-level">◈ Intermediate · No prior QC needed</div>
       <div class="meta-chip chip-topics">⬡ QC · QML · NIST PQC · Lattice Crypto</div>
     </div>
@@ -722,6 +723,11 @@
         <span class="agenda-num">05</span>
         <div class="agenda-item-title">Quiz & Discussion</div>
         <div class="agenda-item-sub">10-question rapid quiz + open Q&A</div>
+      </div>
+      <div class="agenda-item" onclick="goto(6)" data-time="BONUS">
+        <span class="agenda-num">06</span>
+        <div class="agenda-item-title">Research Showcase</div>
+        <div class="agenda-item-sub">Applying QML to physiotherapy — a worked research-gap case study</div>
       </div>
     </div>
 
@@ -1867,6 +1873,106 @@
 </div>
 </section>
 
+<!-- ══════════════════════════════════════════ SECTION 6: RESEARCH SHOWCASE -->
+<style>
+.gap-table td:nth-child(3) { color: var(--accent2); }
+</style>
+<section id="sec6">
+<div class="container">
+  <div class="module-header">
+    <div class="module-tag"><span>06</span> Bonus Module · Research Showcase</div>
+    <h2>QML in Practice:<br>A Physiotherapy Case Study</h2>
+    <p class="module-desc">A worked example of how the quantum kernel concepts from Module Two extend into a real, interdisciplinary research direction.</p>
+  </div>
+
+  <div class="insight">
+    <strong>Why include this?</strong> Quantum kernel methods and Quantum SVM aren't just classroom concepts — they map onto open problems in healthcare. This page walks through one worked example, the gap it addresses, and where else in this domain QML could plausibly help.
+  </div>
+
+  <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 1rem;">The Research Gap</h3>
+  <p style="font-size:0.83rem;color:var(--muted);margin-bottom:1rem;max-width:62ch;">Project: <em>"A Hybrid Quantum Machine Learning Framework for Intelligent Physiotherapy Rehabilitation and Recovery Prediction Using Wearable Sensor Data."</em></p>
+  <table class="compare-table gap-table">
+    <thead><tr><th>Existing Approach</th><th>Limitation</th><th>Where QML Helps</th></tr></thead>
+    <tbody>
+      <tr><td>Traditional physiotherapy assessment</td><td>Manual, periodic clinical evaluation only</td><td>Continuous, sensor-based monitoring between visits</td></tr>
+      <tr><td>Classical ML models (Random Forest, SVM, CNN)</td><td>Performance degrades on the small patient datasets typical of a single clinic or condition</td><td>Quantum kernel methods may separate complex movement patterns from fewer labeled examples</td></tr>
+      <tr><td>Existing rehabilitation prediction systems</td><td>Largely generic, not tailored to the individual patient</td><td>Personalized recovery prediction conditioned on patient-specific features</td></tr>
+      <tr><td>Healthcare IoT systems</td><td>Patient data in transit/storage vulnerable to future quantum attacks</td><td>Post-quantum cryptography (Kyber, Dilithium) secures the same pipeline</td></tr>
+      <tr><td>Wearable sensor analytics</td><td>High-dimensional, multi-channel IMU/EMG data is hard for simple classical kernels to separate</td><td>Quantum feature maps embed multi-channel correlations more directly</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 1rem;">Why Is QML Actually Relevant Here?</h3>
+  <div class="two-col">
+    <div>
+      <div class="accordion">
+        <button class="accordion-head" onclick="toggleAcc(this)">Small Clinical Datasets <span class="chevron">▼</span></button>
+        <div class="accordion-body">Most physiotherapy datasets come from a single clinic, condition, or patient cohort — often a few dozen to a few hundred samples. Classical deep models need far more data to generalize well; quantum kernel methods, built on the same feature-map idea from Module Two, are studied precisely because their expressive feature space may need fewer training examples on certain data structures.</div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-head" onclick="toggleAcc(this)">Multi-Sensor, High-Dimensional Data <span class="chevron">▼</span></button>
+        <div class="accordion-body">A single rehabilitation session can produce dozens of correlated channels — joint angles, EMG amplitude, multi-axis accelerometer readings. A quantum feature map can, in principle, encode correlations across these channels into one quantum state rather than hand-engineering each interaction term.</div>
+      </div>
+    </div>
+    <div>
+      <div class="accordion">
+        <button class="accordion-head" onclick="toggleAcc(this)">Personalization Is a Kernel Problem <span class="chevron">▼</span></button>
+        <div class="accordion-body">Recommending the "right" exercise for a specific patient is fundamentally a similarity problem — finding prior patients with comparable injury profiles and recovery trajectories. That's exactly the structure a kernel method, classical or quantum, is built to exploit.</div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-head" onclick="toggleAcc(this)">An Honest Caveat <span class="chevron">▼</span></button>
+        <div class="accordion-body">As covered in Module Two, quantum kernels can suffer from exponential concentration and aren't automatically advantageous — most physiotherapy datasets aren't yet "classically hard" in the way that would guarantee a quantum speedup. This is a research hypothesis worth testing, not a settled result.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 1rem;">Other Significant Gaps — QML for Physiotherapy & Rehabilitation</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <div class="card-icon">🚶</div>
+      <h3>Gait Analysis</h3>
+      <p>Quantum SVM on wearable IMU/accelerometer data to flag abnormal walking patterns (e.g. post-stroke) earlier and from fewer training samples than classical models.</p>
+    </div>
+    <div class="card card-accent2">
+      <div class="card-icon">🧠</div>
+      <h3>Post-Stroke Recovery Prediction</h3>
+      <p>A hybrid quantum neural network combining clinical data, therapy progress, and imaging features to forecast functional recovery trajectories.</p>
+    </div>
+    <div class="card card-accent3">
+      <div class="card-icon">🎥</div>
+      <h3>Home Exercise Correction</h3>
+      <p>Pose-estimation video feeds classified by a quantum classifier to flag incorrect form during unsupervised home exercises — frozen shoulder, knee rehab, and similar.</p>
+    </div>
+    <div class="card card-accent4">
+      <div class="card-icon">📊</div>
+      <h3>Objective Pain Assessment</h3>
+      <p>Quantum kernel learning over EMG, facial-expression, and physiological signals to move beyond subjective pain scales toward a measurable estimate.</p>
+    </div>
+    <div class="card card-accent">
+      <div class="card-icon">🤲</div>
+      <h3>Parkinson's Rehabilitation Monitoring</h3>
+      <p>Tremor, movement, and balance data tracked over time to monitor disease progression and therapy effectiveness.</p>
+    </div>
+    <div class="card card-accent2">
+      <div class="card-icon">📡</div>
+      <h3>QML + Wearable IoT</h3>
+      <p>An end-to-end pipeline — sensor → quantum feature encoding → variational circuit → assessment — for real-time rehabilitation monitoring.</p>
+    </div>
+    <div class="card card-accent3">
+      <div class="card-icon">⚠️</div>
+      <h3>Fall Risk Prediction (Elderly Care)</h3>
+      <p>Balance and gait data used to lower the false-positive rate of fall-risk scoring compared to existing classical systems.</p>
+    </div>
+  </div>
+
+  <div class="insight" style="border-color:rgba(0,212,170,0.35);background:rgba(0,212,170,0.05);">
+    <strong>The throughline:</strong> every gap above reduces to the same question explored in Module Two — can a quantum feature map separate patient data more efficiently than a classical kernel? Physiotherapy is simply one domain where that question carries real clinical stakes.
+  </div>
+
+  <button class="start-btn" onclick="goto(0)" style="margin-top:1rem;">← Back to Start</button>
+</div>
+</section>
+
 <script>
 // ══════════════ STARS
 const starsCanvas = document.getElementById('stars-bg');
@@ -2301,6 +2407,7 @@ function showScore() {
       <p style="font-size:0.83rem;color:var(--muted);margin-bottom:1.5rem;">Score: ${pct}% · ${total-correct} to review</p>
       <button class="start-btn" onclick="goto(0)" style="margin-right:1rem;">← Back to Start</button>
       <button class="start-btn" style="background:var(--surface);box-shadow:none;border:1px solid var(--border);" onclick="restartQuiz()">Retry Quiz</button>
+      <button class="start-btn" style="margin-left:1rem;" onclick="goto(6)">Research Showcase →</button>
     </div>
   `;
   scoreDiv.scrollIntoView({behavior:'smooth'});
