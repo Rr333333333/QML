@@ -579,7 +579,6 @@
   }
 
   /* ── CIRCUIT VISUAL ── */
-  #circuit-canvas { width: 100%; display: block; border-radius: 6px; }
 
   .formula {
     font-family: 'Space Mono', monospace;
@@ -707,7 +706,7 @@
       <div class="agenda-item" onclick="goto(2)" data-time="12–28 MIN">
         <span class="agenda-num">02</span>
         <div class="agenda-item-title">Quantum ML</div>
-        <div class="agenda-item-sub">Why QML, VQC, QAOA, advantage over classical ML</div>
+        <div class="agenda-item-sub">Why QML, Quantum Kernel Methods, Quantum SVM</div>
       </div>
       <div class="agenda-item" onclick="goto(3)" data-time="28–48 MIN">
         <span class="agenda-num">03</span>
@@ -1476,6 +1475,55 @@
 </section>
 
 <!-- ══════════════════════════════════════════ SECTION 2: QML -->
+<style>
+.svm-demo-block {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+.svm-demo-block h3 { font-size:1rem; font-weight:600; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem; }
+.svm-demo-block > p { font-size:0.83rem; color:var(--muted); line-height:1.6; margin-bottom:1.25rem; }
+.svm-mode-row { display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:1rem; }
+.svm-mode-btn {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:0.8rem; font-weight:600;
+  padding:0.5rem 1.1rem;
+  border-radius:5px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--muted);
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.svm-mode-btn:hover { border-color:var(--accent); color:var(--accent); }
+.svm-mode-btn.active { border-color:var(--accent); color:var(--accent); background:rgba(108,99,255,0.1); }
+.svm-canvas-wrap { position:relative; }
+#svm-canvas { width:100%; display:block; border-radius:6px; background:#080A18; touch-action:none; cursor:grab; }
+#svm-canvas.dragging { cursor:grabbing; }
+.svm-drag-hint {
+  position:absolute; top:0.75rem; right:0.9rem;
+  font-family:'Space Mono',monospace; font-size:0.65rem;
+  color:var(--muted); background:rgba(5,6,15,0.6);
+  padding:0.25rem 0.6rem; border-radius:20px;
+  border:1px solid var(--border);
+  pointer-events:none;
+}
+.svm-legend { display:flex; gap:1.5rem; flex-wrap:wrap; margin:0.85rem 0 0; font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--muted); }
+.svm-legend span.dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:0.4rem; vertical-align:middle; }
+.svm-explainer {
+  background: var(--deep);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  font-size: 0.83rem;
+  color: var(--muted);
+  line-height: 1.7;
+  border-left: 3px solid var(--accent);
+  margin-top: 1.1rem;
+}
+.svm-explainer strong { color: var(--accent); }
+</style>
 <section id="sec2">
 <div class="container">
   <div class="module-header">
@@ -1485,89 +1533,100 @@
   </div>
 
   <div class="insight">
-    <strong>What is QML?</strong> Quantum Machine Learning uses quantum circuits as learnable models — think of a parameterized quantum circuit (PQC) as a neural network where the "neurons" are quantum gates and "weights" are rotation angles. Training happens via quantum-classical hybrid loops.
+    <strong>What is QML?</strong> For this module we focus on one concrete, well-understood corner of QML: <strong>quantum kernel methods</strong> and the <strong>Quantum Support Vector Machine</strong>. The core idea — encode data into a quantum state, then use the geometry of that quantum state space to separate classes — is one of the most rigorously studied paths to a provable quantum advantage in machine learning.
   </div>
 
   <div class="card-grid">
-    <div class="card card-accent">
-      <div class="card-icon">🧬</div>
-      <h3>Variational Quantum Circuits (VQC)</h3>
-      <p>Parameterized circuits trained using gradient descent. The circuit encodes data, applies trainable rotations, and measures expectation values as output — a quantum neural network.</p>
-    </div>
-    <div class="card card-accent2">
-      <div class="card-icon">🎯</div>
-      <h3>QAOA</h3>
-      <p><strong>Quantum Approximate Optimization Algorithm.</strong> Solves combinatorial optimization problems (graph coloring, traveling salesman, portfolio optimization) using quantum interference to find near-optimal solutions.</p>
-    </div>
     <div class="card card-accent3">
       <div class="card-icon">🔑</div>
       <h3>Quantum Kernel Methods</h3>
-      <p>Maps data into exponentially large Hilbert space via quantum feature maps. Kernel matrix computed on quantum hardware — classical SVM runs on top. Theoretical advantage for certain datasets.</p>
+      <p>Maps classical data into an exponentially large Hilbert space via a quantum feature map circuit. The "kernel" — a similarity score between two data points — is computed as the overlap between their quantum states, on quantum hardware.</p>
     </div>
-    <div class="card card-accent4">
-      <div class="card-icon">⚡</div>
-      <h3>Quantum Sampling & Generative Models</h3>
-      <p>Quantum Boltzmann Machines and quantum GANs leverage quantum sampling advantages. Born machines sample from distributions that are #P-hard to sample classically.</p>
+    <div class="card card-accent2">
+      <div class="card-icon">🧮</div>
+      <h3>Quantum SVM</h3>
+      <p>A classical Support Vector Machine where the kernel matrix is supplied by a quantum computer instead of a classical formula. The optimization (finding the max-margin separator) still runs classically — only the kernel estimation is quantum.</p>
     </div>
   </div>
 
-  <!-- VQC CIRCUIT VISUAL -->
-  <div class="viz-block">
-    <h3>⬡ Variational Quantum Circuit — Architecture</h3>
-    <p>A PQC has three parts: <em>data encoding layer</em> (encode classical data into qubit angles), <em>variational ansatz</em> (trainable rotation gates), and <em>measurement</em> (collapses to classical output for loss computation).</p>
-    <canvas id="circuit-canvas" height="200"></canvas>
+  <!-- 3D NON-LINEAR DATASET — KERNEL TRICK VISUALIZER -->
+  <div class="svm-demo-block">
+    <h3>🧊 Teaching the Kernel Trick — A Non-Linear Dataset in 2D and 3D</h3>
+    <p>Below is a classic dataset that defeats a plain linear classifier: an inner circle (Class A) surrounded by an outer ring (Class B). No straight line in 2D can separate them. Switch to "3D Feature Space" to see what happens when we lift each point (x, y) → (x, y, x²+y²) — exactly the kind of non-linear transformation a kernel (classical or quantum) performs implicitly.</p>
+
+    <div class="svm-mode-row">
+      <button class="svm-mode-btn active" id="svm-btn-2d" onclick="setSVMMode('2d')">◻ 2D Input Space</button>
+      <button class="svm-mode-btn" id="svm-btn-3d" onclick="setSVMMode('3d')">◇ 3D Feature Space (lifted)</button>
+    </div>
+
+    <div class="svm-canvas-wrap">
+      <canvas id="svm-canvas" height="380"></canvas>
+      <div class="svm-drag-hint" id="svm-drag-hint" style="display:none;">⟲ drag to rotate</div>
+    </div>
+
+    <div class="svm-legend">
+      <div><span class="dot" style="background:var(--accent3);"></span>Class A — inner circle</div>
+      <div><span class="dot" style="background:var(--accent2);"></span>Class B — outer ring</div>
+    </div>
+
+    <div class="svm-explainer" id="svm-explainer">
+      <strong>2D Input Space:</strong> The two classes form concentric rings — there is provably no straight line that separates Class A from Class B here. A linear classifier (like a basic SVM with no kernel) fails completely on this dataset, no matter how it's rotated.
+    </div>
   </div>
 
   <!-- WHY QML -->
-  <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 1rem;">Why QML? The Relevance for AI</h3>
+  <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 1rem;">Why Quantum Kernels? The Relevance for AI</h3>
   <div class="two-col">
     <div>
       <div class="accordion">
-        <button class="accordion-head" onclick="toggleAcc(this)">Exponential State Space <span class="chevron">▼</span></button>
-        <div class="accordion-body">n qubits represent 2ⁿ dimensional Hilbert space. A 50-qubit system explores 2⁵⁰ ≈ 10¹⁵ states simultaneously — classically impossible. This exponential expressibility may provide advantage for high-dimensional ML tasks like drug discovery and materials science.</div>
+        <button class="accordion-head" onclick="toggleAcc(this)">Exponential Feature Space <span class="chevron">▼</span></button>
+        <div class="accordion-body">n qubits define a 2ⁿ-dimensional Hilbert space. A quantum feature map can embed classical data into this space, meaning the "lift" performed by a quantum kernel can access feature spaces far larger than any classical kernel could represent explicitly — though whether that translates into a usable advantage depends heavily on the dataset.</div>
       </div>
       <div class="accordion">
-        <button class="accordion-head" onclick="toggleAcc(this)">Faster Linear Algebra (HHL) <span class="chevron">▼</span></button>
-        <div class="accordion-body">The HHL algorithm (Harrow-Hassidim-Lloyd) solves linear systems Ax=b in O(log N) vs classical O(N) — exponential speedup. Since neural networks fundamentally rely on matrix operations, this is transformative IF quantum RAM bottlenecks can be overcome.</div>
-      </div>
-      <div class="accordion">
-        <button class="accordion-head" onclick="toggleAcc(this)">Quantum-enhanced Optimization <span class="chevron">▼</span></button>
-        <div class="accordion-body">Training deep networks involves non-convex optimization plagued by local minima and saddle points. Quantum tunneling in quantum annealing and QAOA can escape local minima — potentially leading to better optima in fewer steps.</div>
+        <button class="accordion-head" onclick="toggleAcc(this)">The Kernel Trick, Quantum-Style <span class="chevron">▼</span></button>
+        <div class="accordion-body">Classically, the kernel trick lets an SVM operate in a high-dimensional feature space without ever computing the coordinates explicitly — only the inner products K(x,x') = φ(x)·φ(x') are needed. A quantum kernel does the same thing, but φ(x) is the quantum state produced by a feature-map circuit, and the inner product is estimated by measuring state overlap.</div>
       </div>
     </div>
     <div>
       <div class="accordion">
-        <button class="accordion-head" onclick="toggleAcc(this)">Quantum Natural Language Processing <span class="chevron">▼</span></button>
-        <div class="accordion-body">Grammar structures and sentence diagrams map naturally to quantum circuits via DisCoCat (Distributional Compositional Categorical) models. Companies like Quantinuum are building QNLP systems — a fundamentally new way to represent meaning.</div>
+        <button class="accordion-head" onclick="toggleAcc(this)">Engineered Quantum Advantage <span class="chevron">▼</span></button>
+        <div class="accordion-body">For most natural datasets, classical kernels (RBF, polynomial) work just as well or better. The clearest theoretical separations come from datasets specifically constructed around problems believed to be classically hard, such as discrete logarithm-based classification tasks — demonstrating that a quantum advantage is possible but not automatic.</div>
       </div>
       <div class="accordion">
-        <button class="accordion-head" onclick="toggleAcc(this)">Quantum Advantage for Chemistry & Drug Discovery <span class="chevron">▼</span></button>
-        <div class="accordion-body">Simulating molecular Hamiltonians is exponentially hard classically but natural for quantum computers. Google's Sycamore and IBM's systems already simulate small molecules. This directly impacts AI-driven drug discovery (AlphaFold meets quantum chemistry).</div>
-      </div>
-      <div class="accordion">
-        <button class="accordion-head" onclick="toggleAcc(this)">Quantum Federated Learning <span class="chevron">▼</span></button>
-        <div class="accordion-body">Quantum secure multiparty computation allows distributed ML training with provable privacy guarantees — the model is trained without any party revealing their data, using quantum cryptographic protocols.</div>
+        <button class="accordion-head" onclick="toggleAcc(this)">Measuring the Quantum Kernel <span class="chevron">▼</span></button>
+        <div class="accordion-body">K(x,x') = |⟨Φ(x)|Φ(x')⟩|² is estimated by running a feature-map circuit (e.g. a ZZFeatureMap) for x, its inverse for x', and measuring the probability of returning to the all-zero state — or via a swap test between two copies of the state. Each entry of the kernel matrix needs many circuit shots to estimate accurately.</div>
       </div>
     </div>
   </div>
 
   <!-- SPEEDUP TABLE -->
-  <h3 style="font-size:1rem;font-weight:600;margin:1rem 0 1rem;">Quantum Algorithm Speedups Relevant to ML</h3>
+  <h3 style="font-size:1rem;font-weight:600;margin:1rem 0 1rem;">Quantum SVM — Complexity at a Glance</h3>
   <table class="compare-table">
-    <thead><tr><th>Algorithm</th><th>Classical Complexity</th><th>Quantum Complexity</th><th>ML Application</th></tr></thead>
+    <thead><tr><th>Task</th><th>Classical Complexity</th><th>Quantum Complexity</th><th>Notes</th></tr></thead>
     <tbody>
-      <tr><td>Grover's Search</td><td>O(N)</td><td><span class="badge badge-good">O(√N)</span></td><td>Nearest neighbor search, optimization</td></tr>
-      <tr><td>HHL (Linear Systems)</td><td>O(N³)</td><td><span class="badge badge-good">O(log N) *</span></td><td>Regression, matrix inversion</td></tr>
-      <tr><td>Quantum PCA</td><td>O(N²)</td><td><span class="badge badge-good">O(log N) *</span></td><td>Dimensionality reduction</td></tr>
-      <tr><td>Quantum SVM</td><td>O(N·d)</td><td><span class="badge badge-good">O(log(N·d))</span></td><td>Classification</td></tr>
-      <tr><td>Shor's Factoring</td><td>O(e^N^(1/3))</td><td><span class="badge badge-good">O(N³ log N)</span></td><td>Cryptanalysis</td></tr>
+      <tr><td>Kernel matrix entry (per pair)</td><td>O(d) — direct formula</td><td><span class="badge badge-warn">O(circuit depth) + shots</span></td><td>d = feature dimension; quantum cost dominated by shot count for accurate estimation</td></tr>
+      <tr><td>Quantum SVM (engineered kernel)</td><td>O(N·d)</td><td><span class="badge badge-good">O(log(N·d)) *</span></td><td>Theoretical speedup shown only for specially constructed, classically-hard datasets</td></tr>
     </tbody>
   </table>
-  <p style="font-size:0.75rem;color:var(--muted);margin-bottom:2rem;">* Subject to quantum RAM (QRAM) assumptions — active research area.</p>
+  <p style="font-size:0.75rem;color:var(--muted);margin-bottom:2rem;">* Holds for datasets engineered to be classically hard (e.g. based on discrete-log problems); not a general-purpose speedup over classical SVM on typical real-world data.</p>
 
   <div class="insight" style="border-color:rgba(0,212,170,0.35);background:rgba(0,212,170,0.05);">
-    <strong>Current Challenges:</strong> Barren plateaus (vanishing gradients in deep PQCs), decoherence, limited qubit connectivity, high error rates. QML is theoretically promising but practically constrained to small NISQ devices. Hybrid quantum-classical approaches bridge the gap.
+    <strong>Current Challenges:</strong> Quantum kernel values can suffer from <em>exponential concentration</em> — as qubit count or circuit depth grows, kernel entries collapse toward a constant value, making classes indistinguishable and the kernel matrix unlearnable. Add shot noise from finite measurements, and the fact that many "quantum" kernels turn out to be classically simulable, and the practical case for quantum kernels remains narrow and dataset-specific (see Huang et al., "Power of data in quantum machine learning," 2021).
   </div>
+
+  <!-- QSVM vs CLASSICAL SVM COMPARISON -->
+  <h3 style="font-size:1rem;font-weight:600;margin:1.5rem 0 1rem;">Quantum SVM vs Classical SVM</h3>
+  <table class="compare-table">
+    <thead><tr><th>Aspect</th><th>Classical SVM</th><th>Quantum SVM</th></tr></thead>
+    <tbody>
+      <tr><td>Feature map</td><td>Explicit or implicit kernel function (linear, polynomial, RBF, sigmoid)</td><td>Parameterized quantum circuit feature map (e.g. ZZFeatureMap) embedding data as a quantum state</td></tr>
+      <tr><td>Kernel computation</td><td>Closed-form K(x,x'), computed directly on CPU/GPU</td><td>Estimated by measuring quantum state overlap — repeated circuit "shots" per entry</td></tr>
+      <tr><td>Feature space dimension</td><td>Finite (polynomial) or infinite (RBF), set by kernel choice</td><td>Scales as 2ⁿ with n qubits in the feature-map circuit</td></tr>
+      <tr><td>Computational cost</td><td>O(N²)–O(N³) to build the kernel matrix, all on classical hardware</td><td>Per-entry circuit execution plus shot noise; advantage limited to specific "quantum-hard" kernels</td></tr>
+      <tr><td>Hardware</td><td>Any CPU/GPU</td><td>Quantum processor or simulator — current NISQ devices are noisy</td></tr>
+      <tr><td>Maturity</td><td><span class="badge badge-good">Production-ready</span> — scikit-learn, libsvm, widely deployed</td><td><span class="badge badge-warn">Experimental</span> — small qubit counts (~20–30), active research</td></tr>
+    </tbody>
+  </table>
 
   <button class="start-btn" onclick="goto(3)" style="margin-top:1rem;">Next: Quantum Cryptography →</button>
 </div>
@@ -1853,8 +1912,8 @@ function goto(i) {
   navBtns[i].classList.add('active');
   document.getElementById('progress-fill').style.width = ((i/(sections.length-1))*100)+'%';
   window.scrollTo(0,0);
-  if(i===1){ setTimeout(drawBloch,100); setTimeout(drawCircuit,200); }
-  if(i===2){ setTimeout(drawVQC,100); }
+  if(i===1){ setTimeout(drawBloch,100); }
+  if(i===2){ setTimeout(initSVMDemo,100); }
 
   if(i===5){ renderQuiz(); }
 }
@@ -1970,103 +2029,209 @@ function drawBloch() {
 }
 
 
-function drawVQC() {
-  const canvas = document.getElementById('circuit-canvas');
+// ══════════════════════════════════════════
+// 3D KERNEL TRICK DEMO — Non-linear dataset, SVM vs Quantum SVM
+// ══════════════════════════════════════════
+let svmMode = '2d';
+let svmPoints = null;
+let svmRotX = 0.55, svmRotY = 0.6;
+let svmDragging = false, svmLastX = 0, svmLastY = 0;
+let svmListenersBound = false;
+const SVM_Z_OFFSET = 3.0;   // recenters x²+y² (range ~0–6.76) around 0
+const SVM_PLANE_RAW_Z = 2.0; // separating-plane height before recentering
+
+function generateSVMData() {
+  const pts = [];
+  for(let i=0;i<35;i++){
+    const r = Math.random()*1.0;
+    const a = Math.random()*Math.PI*2;
+    pts.push({ x:r*Math.cos(a), y:r*Math.sin(a), label:0 });
+  }
+  for(let i=0;i<45;i++){
+    const r = 1.8 + Math.random()*0.8;
+    const a = Math.random()*Math.PI*2;
+    pts.push({ x:r*Math.cos(a), y:r*Math.sin(a), label:1 });
+  }
+  return pts;
+}
+
+function initSVMDemo() {
+  if(!svmPoints) svmPoints = generateSVMData();
+  const canvas = document.getElementById('svm-canvas');
+  if(!canvas) return;
+  if(!svmListenersBound){
+    bindSVMDrag(canvas);
+    svmListenersBound = true;
+  }
+  drawSVMDemo();
+}
+
+function setSVMMode(mode) {
+  svmMode = mode;
+  document.getElementById('svm-btn-2d').classList.toggle('active', mode==='2d');
+  document.getElementById('svm-btn-3d').classList.toggle('active', mode==='3d');
+  document.getElementById('svm-drag-hint').style.display = mode==='3d' ? 'block' : 'none';
+  const explainer = document.getElementById('svm-explainer');
+  if(mode==='2d'){
+    explainer.innerHTML = `<strong>2D Input Space:</strong> The two classes form concentric rings — there is provably no straight line that separates Class A from Class B here. A linear classifier (like a basic SVM with no kernel) fails completely on this dataset, no matter how it's rotated.`;
+  } else {
+    explainer.innerHTML = `<strong>3D Feature Space (lifted):</strong> Applying φ(x,y) = (x, y, x²+y²) lifts every point onto a paraboloid — the inner circle stays low, the outer ring rises higher. A single flat plane now separates the two classes perfectly. This is exactly what a kernel function does implicitly: K(x,x') = φ(x)·φ(x') lets an SVM find this separating plane <em>without ever computing φ(x) explicitly</em>. A Quantum SVM replaces φ(x) with a quantum feature-map circuit, and estimates the same inner product by measuring overlap between quantum states.`;
+  }
+  drawSVMDemo();
+}
+
+function bindSVMDrag(canvas) {
+  const onDown = (e) => {
+    if(svmMode!=='3d') return;
+    svmDragging = true;
+    canvas.classList.add('dragging');
+    const p = (e.touches ? e.touches[0] : e);
+    svmLastX = p.clientX; svmLastY = p.clientY;
+  };
+  const onMove = (e) => {
+    if(!svmDragging) return;
+    const p = (e.touches ? e.touches[0] : e);
+    const dx = p.clientX - svmLastX, dy = p.clientY - svmLastY;
+    svmLastX = p.clientX; svmLastY = p.clientY;
+    svmRotY += dx*0.008;
+    svmRotX = Math.max(0.05, Math.min(1.5, svmRotX - dy*0.008));
+    drawSVMDemo();
+    e.preventDefault();
+  };
+  const onUp = () => { svmDragging = false; canvas.classList.remove('dragging'); };
+  canvas.addEventListener('mousedown', onDown);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  canvas.addEventListener('touchstart', onDown, {passive:true});
+  canvas.addEventListener('touchmove', onMove, {passive:false});
+  canvas.addEventListener('touchend', onUp);
+}
+
+function project3D(x, y, z) {
+  // yaw around the vertical axis (horizontal drag)
+  const cosY = Math.cos(svmRotY), sinY = Math.sin(svmRotY);
+  const x1 = x*cosY - y*sinY;
+  const y1 = x*sinY + y*cosY;
+  // pitch / tilt (vertical drag)
+  const cosX = Math.cos(svmRotX), sinX = Math.sin(svmRotX);
+  const y2 = y1*cosX - z*sinX;
+  const z2 = y1*sinX + z*cosX;
+  return { sx:x1, sy:z2, depth:y2 };
+}
+
+function drawSVMDemo() {
+  const canvas = document.getElementById('svm-canvas');
   if(!canvas) return;
   canvas.width = canvas.offsetWidth * devicePixelRatio;
-  canvas.height = 200 * devicePixelRatio;
+  canvas.height = 380 * devicePixelRatio;
   const ctx = canvas.getContext('2d');
   ctx.scale(devicePixelRatio, devicePixelRatio);
-  const W = canvas.offsetWidth, H = 200;
-  ctx.fillStyle = '#0F1228'; ctx.fillRect(0,0,W,H);
+  const W = canvas.offsetWidth, H = 380;
+  ctx.fillStyle = '#080A18'; ctx.fillRect(0,0,W,H);
 
-  const qubits = 3;
-  const qY = [H*0.28, H*0.5, H*0.72];
-  const colors = ['#6C63FF','#00D4AA','#FF6B6B'];
+  if(!svmPoints) svmPoints = generateSVMData();
 
-  // Draw qubit lines
-  for(let q=0;q<qubits;q++){
-    ctx.beginPath(); ctx.moveTo(40,qY[q]); ctx.lineTo(W-40,qY[q]);
-    ctx.strokeStyle=`rgba(${q===0?'108,99,255':q===1?'0,212,170':'255,107,107'},0.3)`;
-    ctx.lineWidth=1.5; ctx.stroke();
-    // label
-    ctx.fillStyle=colors[q]; ctx.font='bold 12px Space Mono,monospace';
-    ctx.fillText('q'+q, 8, qY[q]+4);
+  if(svmMode === '2d') draw2DScatter(ctx, W, H);
+  else draw3DLift(ctx, W, H);
+}
+
+function draw2DScatter(ctx, W, H) {
+  const cx = W/2, cy = H/2;
+  const S = Math.min(W,H) * 0.16;
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;
+  for(let i=-3;i<=3;i++){
+    ctx.beginPath(); ctx.moveTo(cx+i*S, 20); ctx.lineTo(cx+i*S, H-20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(20, cy+i*S); ctx.lineTo(W-20, cy+i*S); ctx.stroke();
   }
+  ctx.strokeStyle = 'rgba(200,200,255,0.18)'; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.moveTo(20,cy); ctx.lineTo(W-20,cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx,20); ctx.lineTo(cx,H-20); ctx.stroke();
 
-  // Gate helper
-  function drawGate(ctx, x, y, label, color, w=36, h=28) {
-    ctx.fillStyle = color+'22';
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.5;
+  svmPoints.forEach(p => {
+    const px = cx + p.x*S, py = cy - p.y*S;
     ctx.beginPath();
-    const r=4;
-    ctx.roundRect(x-w/2,y-h/2,w,h,r);
-    ctx.fill(); ctx.stroke();
-    ctx.fillStyle = color;
-    ctx.font = 'bold 11px Space Mono,monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(label, x, y+4);
-  }
-
-  // Layer 1: Encoding
-  const lx = [90,160,240,320,400,480,560,640,W-70];
-  ctx.fillStyle='rgba(108,99,255,0.08)';
-  ctx.fillRect(60,10,110,H-20);
-  ctx.fillStyle='rgba(108,99,255,0.4)'; ctx.font='10px Space Grotesk,sans-serif';
-  ctx.fillText('Data Encoding',115,22);
-  drawGate(ctx,90,qY[0],'Rx','#6C63FF');
-  drawGate(ctx,90,qY[1],'Ry','#6C63FF');
-  drawGate(ctx,90,qY[2],'Rz','#6C63FF');
-
-  // Layer 2: Entangling
-  ctx.fillStyle='rgba(0,212,170,0.06)';
-  ctx.fillRect(180,10,140,H-20);
-  ctx.fillStyle='rgba(0,212,170,0.4)'; ctx.font='10px Space Grotesk,sans-serif';
-  ctx.fillText('Entanglement',250,22);
-  // CNOT
-  [0,1].forEach(q => {
-    const ctrl=qY[q], tgt=qY[q+1];
-    ctx.beginPath(); ctx.moveTo(230,ctrl); ctx.lineTo(230,tgt);
-    ctx.strokeStyle='rgba(0,212,170,0.5)'; ctx.lineWidth=1.5; ctx.stroke();
-    ctx.beginPath(); ctx.arc(230,ctrl,5,0,Math.PI*2);
-    ctx.fillStyle='#00D4AA'; ctx.fill();
-    ctx.beginPath(); ctx.arc(230,tgt,10,0,Math.PI*2);
-    ctx.strokeStyle='#00D4AA'; ctx.lineWidth=1.5; ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(230,tgt-10); ctx.lineTo(230,tgt+10);
-    ctx.moveTo(220,tgt); ctx.lineTo(240,tgt);
-    ctx.stroke();
+    ctx.arc(px, py, 4.5, 0, Math.PI*2);
+    ctx.fillStyle = p.label===0 ? '#FF6B6B' : '#00D4AA';
+    ctx.globalAlpha = 0.9; ctx.fill(); ctx.globalAlpha = 1;
   });
 
-  // Layer 3: Variational
-  ctx.fillStyle='rgba(255,179,71,0.06)';
-  ctx.fillRect(340,10,200,H-20);
-  ctx.fillStyle='rgba(255,179,71,0.5)'; ctx.font='10px Space Grotesk,sans-serif';
-  ctx.fillText('Variational Ansatz (θ learnable)',420,22);
-  [370,450].forEach(x => {
-    drawGate(ctx,x,qY[0],'Ry(θ)','#FFB347',48);
-    drawGate(ctx,x,qY[1],'Rz(θ)','#FFB347',48);
-    drawGate(ctx,x,qY[2],'Rx(θ)','#FFB347',48);
+  ctx.fillStyle = 'rgba(255,107,107,0.65)';
+  ctx.font = '11px Space Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('No straight line separates Class A from Class B', cx, H-12);
+}
+
+function draw3DLift(ctx, W, H) {
+  const cx = W/2, cy = H/2 + 35;
+  const S = Math.min(W, H-60) * 0.095;
+  const objects = [];
+
+  // floor reference rings, sitting below the lowest data point
+  const zBase = -SVM_Z_OFFSET - 0.3;
+  for(let rr=1; rr<=3; rr++){
+    const ringPts = [];
+    for(let a=0;a<=32;a++){
+      const ang = (a/32)*Math.PI*2;
+      ringPts.push({ x: rr*Math.cos(ang), y: rr*Math.sin(ang), z: zBase });
+    }
+    objects.push({ type:'ring', pts: ringPts });
+  }
+
+  // separating plane between the two lifted classes
+  const planeZ = SVM_PLANE_RAW_Z - SVM_Z_OFFSET;
+  const corners = [
+    {x:-3,y:-3,z:planeZ}, {x:3,y:-3,z:planeZ}, {x:3,y:3,z:planeZ}, {x:-3,y:3,z:planeZ}
+  ];
+  objects.push({ type:'plane', pts: corners });
+
+  svmPoints.forEach(p => {
+    const z = (p.x*p.x + p.y*p.y) - SVM_Z_OFFSET;
+    objects.push({ type:'point', x:p.x, y:p.y, z, label:p.label });
   });
 
-  // Measure
-  ctx.fillStyle='rgba(255,107,107,0.08)';
-  ctx.fillRect(W-90,10,60,H-20);
-  ctx.fillStyle='rgba(255,107,107,0.5)'; ctx.font='10px Space Grotesk,sans-serif';
-  ctx.fillText('Measure',W-60,22);
-  for(let q=0;q<qubits;q++){
-    ctx.beginPath();
-    ctx.arc(W-60, qY[q], 14, 0, Math.PI*2);
-    ctx.fillStyle='rgba(255,107,107,0.15)';
-    ctx.strokeStyle='#FF6B6B'; ctx.lineWidth=1.5;
-    ctx.fill(); ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(W-60,qY[q]+4,10,Math.PI,0);
-    ctx.strokeStyle='#FF6B6B'; ctx.lineWidth=1.5; ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(W-60,qY[q]+4); ctx.lineTo(W-54,qY[q]-6);
-    ctx.strokeStyle='#FF6B6B'; ctx.stroke();
-  }
+  objects.forEach(o => {
+    if(o.type === 'point') {
+      o.proj = project3D(o.x, o.y, o.z);
+      o.depth = o.proj.depth;
+    } else {
+      o.proj = o.pts.map(pt => project3D(pt.x, pt.y, pt.z));
+      o.depth = o.proj.reduce((s,p)=>s+p.depth,0)/o.proj.length;
+    }
+  });
+  objects.sort((a,b) => a.depth - b.depth);
+
+  objects.forEach(o => {
+    if(o.type === 'ring') {
+      ctx.beginPath();
+      o.proj.forEach((p,i) => {
+        const sx = cx + p.sx*S, sy = cy - p.sy*S;
+        i===0 ? ctx.moveTo(sx,sy) : ctx.lineTo(sx,sy);
+      });
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1; ctx.stroke();
+    } else if(o.type === 'plane') {
+      ctx.beginPath();
+      o.proj.forEach((p,i) => {
+        const sx = cx + p.sx*S, sy = cy - p.sy*S;
+        i===0 ? ctx.moveTo(sx,sy) : ctx.lineTo(sx,sy);
+      });
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(108,99,255,0.16)';
+      ctx.strokeStyle = 'rgba(108,99,255,0.5)'; ctx.lineWidth = 1.3;
+      ctx.fill(); ctx.stroke();
+    } else {
+      const sx = cx + o.proj.sx*S, sy = cy - o.proj.sy*S;
+      ctx.beginPath(); ctx.arc(sx, sy, 4.2, 0, Math.PI*2);
+      ctx.fillStyle = o.label===0 ? '#FF6B6B' : '#00D4AA';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 0.5; ctx.stroke();
+    }
+  });
+
+  ctx.fillStyle = 'rgba(0,212,170,0.65)';
+  ctx.font = '11px Space Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('φ(x,y) = (x, y, x²+y²) — a flat plane now separates the classes', cx, H-12);
 }
 
 
@@ -2075,6 +2240,7 @@ function toggleAcc(btn) {
   btn.nextElementSibling.classList.toggle('open');
 }
 
+
 // ══════════════ QUIZ
 const quizData = [
   { q:"What is the state of a qubit before measurement?", opts:["Definitely 0","Definitely 1","A superposition of 0 and 1","Either 0 or 1, but unknown"], ans:2, exp:"A qubit exists in a superposition — a linear combination α|0⟩ + β|1⟩. Only measurement collapses it to a definite 0 or 1." },
@@ -2082,7 +2248,7 @@ const quizData = [
   { q:"What does the Hadamard (H) gate do to the |0⟩ state?", opts:["Flips it to |1⟩","Creates equal superposition: (|0⟩+|1⟩)/√2","Applies a phase of π","Nothing — it's an identity"], ans:1, exp:"H gate creates equal superposition: H|0⟩ = (|0⟩+|1⟩)/√2. This is the starting point of most quantum algorithms." },
   { q:"Which NIST PQC standard (FIPS 203) is based on which hard problem?", opts:["Integer factorization","Discrete logarithm","Module Learning With Errors (LWE)","Shortest path in graphs"], ans:2, exp:"FIPS 203 (ML-KEM / Kyber) is based on the Module Learning With Errors problem — believed to resist quantum attacks." },
   { q:"What is 'entanglement' in quantum computing?", opts:["Two qubits sharing classical bits","Quantum correlation where measuring one instantly affects the other","Two qubits in the same state","A gate that connects two circuit layers"], ans:1, exp:"Entanglement is a quantum correlation — measuring one entangled qubit instantly determines properties of its partner, regardless of distance." },
-  { q:"What is a Variational Quantum Circuit (VQC)?", opts:["A classical neural network simulating quantum effects","A fixed quantum circuit for Shor's algorithm","A parameterized quantum circuit trained like a neural network","A quantum circuit for error correction"], ans:2, exp:"A VQC is a parameterized quantum circuit with trainable rotation angles, trained via quantum-classical hybrid optimization — essentially a quantum neural network." },
+  { q:"In a Quantum SVM, what does the quantum computer actually do?", opts:["Runs the entire optimization to find the max-margin separator","Estimates kernel values K(x,x') by measuring quantum state overlap","Stores the training data permanently in qubits","Replaces the labels with quantum random numbers"], ans:1, exp:"In a Quantum SVM, the quantum circuit's job is to estimate the kernel matrix — the similarity scores between data points — by measuring overlap between quantum states. The optimization itself still runs classically." },
   { q:"CRYSTALS-Dilithium (FIPS 204) is used for what purpose?", opts:["Key encapsulation","Digital signatures","Symmetric encryption","Random number generation"], ans:1, exp:"FIPS 204 (ML-DSA / Dilithium) is a digital signature standard — used for code signing, document signing, and authentication in post-quantum systems." },
   { q:"What is the 'harvest now, decrypt later' threat?", opts:["Quantum computers cracking passwords in real time","Adversaries collecting encrypted data now to decrypt once quantum computers mature","Quantum computers interfering with satellite signals","A side-channel attack on quantum hardware"], ans:1, exp:"Adversaries are collecting encrypted internet traffic today, planning to decrypt it when sufficiently powerful quantum computers become available — making data sensitive for decades." },
   { q:"Which framework is best suited specifically for Quantum Machine Learning?", opts:["IBM Qiskit","Google Cirq","Xanadu PennyLane","Microsoft Q#"], ans:2, exp:"PennyLane by Xanadu is designed specifically for QML — it supports automatic differentiation through quantum circuits and integrates with PyTorch, TensorFlow, and JAX." },
@@ -2148,8 +2314,6 @@ function restartQuiz() {
 
 // ══════════════ INIT
 setTimeout(drawBloch, 300);
-setTimeout(drawCircuit, 300);
-function drawCircuit(){ drawVQC(); }
 
 // ══════════════════════════════════
 // COIN — SUPERPOSITION
